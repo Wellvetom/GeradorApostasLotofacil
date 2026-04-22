@@ -103,7 +103,6 @@ A aplicação utiliza projeções com LINQ para exibir dados combinados:
 * 🎯 Conferência automática de resultados
 * 🌐 Integração com API de resultados da Lotofácil
 * 🔍 Filtros por usuário/data/concurso
-* 📄 Exportação de apostas (CSV/PDF)
 
 ---
 
