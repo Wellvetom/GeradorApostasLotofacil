@@ -46,6 +46,7 @@
             DecimoTerceiroNumero = new DataGridViewTextBoxColumn();
             DecimoQuartoNumero = new DataGridViewTextBoxColumn();
             DecimoQuintoNumero = new DataGridViewTextBoxColumn();
+            btn_exportarApostas = new Button();
             ((System.ComponentModel.ISupportInitialize)dgv_listaApostas).BeginInit();
             SuspendLayout();
             // 
@@ -198,12 +199,26 @@
             DecimoQuintoNumero.Name = "DecimoQuintoNumero";
             DecimoQuintoNumero.Width = 125;
             // 
+            // btn_exportarApostas
+            // 
+            btn_exportarApostas.BackColor = Color.Yellow;
+            btn_exportarApostas.FlatStyle = FlatStyle.Flat;
+            btn_exportarApostas.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            btn_exportarApostas.Location = new Point(201, 31);
+            btn_exportarApostas.Name = "btn_exportarApostas";
+            btn_exportarApostas.Size = new Size(141, 43);
+            btn_exportarApostas.TabIndex = 11;
+            btn_exportarApostas.Text = "Exportar Apostas";
+            btn_exportarApostas.UseVisualStyleBackColor = false;
+            btn_exportarApostas.Click += btn_exportarApostas_Click;
+            // 
             // FormListarApostas
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.DarkSlateBlue;
             ClientSize = new Size(948, 525);
+            Controls.Add(btn_exportarApostas);
             Controls.Add(btnListasApostas);
             Controls.Add(dgv_listaApostas);
             Name = "FormListarApostas";
@@ -231,5 +246,6 @@
         private DataGridViewTextBoxColumn DecimoTerceiroNumero;
         private DataGridViewTextBoxColumn DecimoQuartoNumero;
         private DataGridViewTextBoxColumn DecimoQuintoNumero;
+        private Button btn_exportarApostas;
     }
 }
