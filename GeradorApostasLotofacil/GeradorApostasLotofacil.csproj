@@ -36,4 +36,14 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Dll\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="LoteriasCaixaRobot">
+      <HintPath>Dll\LoteriasCaixaRobot.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

@@ -40,6 +40,7 @@
             btn_FormListarApostas = new Button();
             btn_FormIncluirAposta = new Button();
             btnFormLoginCadastro = new Button();
+            btn_ImportarApostas = new Button();
             panel_principal.SuspendLayout();
             panel_menu.SuspendLayout();
             SuspendLayout();
@@ -130,6 +131,7 @@
             // 
             panel_menu.AllowDrop = true;
             panel_menu.BackColor = Color.FromArgb(37, 46, 59);
+            panel_menu.Controls.Add(btn_ImportarApostas);
             panel_menu.Controls.Add(linklogoff);
             panel_menu.Controls.Add(btn_FormListarApostas);
             panel_menu.Controls.Add(btn_FormIncluirAposta);
@@ -208,6 +210,25 @@
             btnFormLoginCadastro.UseVisualStyleBackColor = true;
             btnFormLoginCadastro.Click += btnFormLoginCadastro_Click;
             // 
+            // btn_ImportarApostas
+            // 
+            btn_ImportarApostas.FlatAppearance.BorderColor = Color.White;
+            btn_ImportarApostas.FlatAppearance.BorderSize = 0;
+            btn_ImportarApostas.FlatAppearance.MouseDownBackColor = Color.White;
+            btn_ImportarApostas.FlatAppearance.MouseOverBackColor = Color.Indigo;
+            btn_ImportarApostas.FlatStyle = FlatStyle.Flat;
+            btn_ImportarApostas.Font = new Font("Segoe UI", 15F);
+            btn_ImportarApostas.ForeColor = SystemColors.ControlLightLight;
+            btn_ImportarApostas.Image = (Image)resources.GetObject("btn_ImportarApostas.Image");
+            btn_ImportarApostas.ImageAlign = ContentAlignment.MiddleLeft;
+            btn_ImportarApostas.Location = new Point(3, 216);
+            btn_ImportarApostas.Name = "btn_ImportarApostas";
+            btn_ImportarApostas.Size = new Size(244, 69);
+            btn_ImportarApostas.TabIndex = 4;
+            btn_ImportarApostas.Text = "   Importar Apostas";
+            btn_ImportarApostas.UseVisualStyleBackColor = true;
+            btn_ImportarApostas.Click += btn_ImportarApostas_Click;
+            // 
             // FormMenuPrincipal
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -239,5 +260,6 @@
         private Button btn_restaurar;
         private Button btnFormLoginCadastro;
         private LinkLabel linklogoff;
+        private Button btn_ImportarApostas;
     }
 }

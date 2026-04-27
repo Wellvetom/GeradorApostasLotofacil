@@ -27,6 +27,7 @@ namespace GeradorApostasLotofacil
             btn_restaurar.Visible = false;
             btn_FormIncluirAposta.Enabled = false;
             btn_FormListarApostas.Enabled = false;
+            btn_ImportarApostas.Visible = false;
         }
 
         private void btn_fechar_Click(object sender, EventArgs e)
@@ -69,6 +70,8 @@ namespace GeradorApostasLotofacil
                 btnFormLoginCadastro.Enabled = false;
                 btn_FormIncluirAposta.Enabled = true;
                 btn_FormListarApostas.Enabled = true;
+                if(usuario.Perfil.Equals("Administrador"))
+                    btn_ImportarApostas.Visible=true;
                 linklogoff.Visible = true;
                 linklogoff.Enabled = true;
             };
@@ -98,6 +101,7 @@ namespace GeradorApostasLotofacil
             linklogoff.Visible = false;
             btn_FormIncluirAposta.Enabled = false;
             btn_FormListarApostas.Enabled = false;
+            btn_ImportarApostas.Visible = false;
             _navigationService.NavegarPara(new FormLogin(_navigationService, _session));
 
         }
@@ -105,6 +109,12 @@ namespace GeradorApostasLotofacil
         private void btn_FormListarApostas_Click(object sender, EventArgs e)
         {
             _navigationService.NavegarPara(new FormListarApostas(_navigationService, _session));
+
+        }
+
+        private void btn_ImportarApostas_Click(object sender, EventArgs e)
+        {
+            _navigationService.NavegarPara(new FormImportarApostas(_navigationService, _session));
 
         }
     }
