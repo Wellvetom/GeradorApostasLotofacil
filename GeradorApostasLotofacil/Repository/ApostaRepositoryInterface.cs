@@ -9,6 +9,8 @@ namespace GeradorApostasLotofacil.Repository
     {
         Task Salvar(ApostaModel aposta);
         Task<List<ApostaModel>> ObterTodas();
+        Task<List<ApostaModel>> ObterUltimas10();
+        Task<ApostaModel> ObterUltima();
         Task<List<ApostaModel>> ObterTodasPorId(int usuarioId);
     }
 }

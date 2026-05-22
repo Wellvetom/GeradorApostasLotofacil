@@ -36,7 +36,7 @@ namespace GeradorApostasLotofacil
         {
             try
             {
-                var apostas = _apostaService.GerarApostas(numberBox_quantidadeApostas.Value, radioBtn_apostasIneditas.Checked);
+                var apostas = _apostaService.GerarJogosInteligentes(numberBox_quantidadeApostas.Value);
 
                 if (apostas.Jogos.Any())
                 {

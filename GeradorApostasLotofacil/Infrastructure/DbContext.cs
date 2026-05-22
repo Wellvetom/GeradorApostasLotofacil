@@ -9,6 +9,8 @@ namespace GeradorApostasLotofacil.Infrastructure
     public class AppDbContext : DbContext
     {
         public DbSet<ApostaModel> Apostas { get; set; }
+
+        public DbSet<JogoModel> Jogos { get; set; }
         public DbSet<UsuarioModel> Usuarios { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)

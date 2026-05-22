@@ -1,4 +1,5 @@
 ﻿using GeradorApostasLotofacil.Application;
+using GeradorApostasLotofacil.Helper;
 using GeradorApostasLotofacil.Infrastructure;
 using GeradorApostasLotofacil.Repository;
 using GeradorApostasLotofacil.Session;
@@ -28,11 +29,12 @@ namespace GeradorApostasLotofacil
             _apostaService = new ApostaService(apostaRepository);
             _usuarioSession = usuarioSession;
             CarregarDados();
+            CarregaUltimasApostas();
         }
 
-        private void btn_importarApostas_Click(object sender, EventArgs e)
+        private async void btn_importarApostas_Click(object sender, EventArgs e)
         {
-
+            await _apostaService.ImportarApostas();
         }
         private async void CarregarDados()
         {
@@ -40,9 +42,44 @@ namespace GeradorApostasLotofacil
 
             if (retornoRobo.ProcessOK)
             {
-                label_dadosApostas.Text = $"Ultimo sorteio realizado em: {retornoRobo.DataUltimoSorteio.ToString("dd/MM/yyyy")}";
+                label_dadosApostas.Text = $"Ultimo sorteio realizado em: {retornoRobo.DataUltimoSorteio.ToString("dd/MM/yyyy")}\nO proximo sorteio será realizado em: {retornoRobo.DataProximoSorteio.ToString("dd/MM/yyyy")} ";
             }
 
         }
+        private async void CarregaUltimasApostas()
+        {
+            var apostas = await _apostaService.ObterUltimas10();
+
+            if (apostas.Any())
+            {
+                var apostasBuscadas = apostas.SelectMany(a => a.Jogos.Select(j => new ApostaGridViewModel
+                {
+                    Id = j.Id,
+                    PrimeiroNumero = j.PrimeiroNumero,
+                    SegundoNumero = j.SegundoNumero,
+                    TerceiroNumero = j.TerceiroNumero,
+                    QuartoNumero = j.QuartoNumero,
+                    QuintoNumero = j.QuintoNumero,
+                    SextoNumero = j.SextoNumero,
+                    SetimoNumero = j.SetimoNumero,
+                    OitavoNumero = j.OitavoNumero,
+                    NonoNumero = j.NonoNumero,
+                    DecimoNumero = j.DecimoNumero,
+                    DecimoPrimeiroNumero = j.DecimoPrimeiroNumero,
+                    DecimoSegundoNumero = j.DecimoSegundoNumero,
+                    DecimoTerceiroNumero = j.DecimoTerceiroNumero,
+                    DecimoQuartoNumero = j.DecimoQuartoNumero,
+                    DecimoQuintoNumero = j.DecimoQuintoNumero,
+
+                    Usuario = _usuarioSession.UsuarioLogado.Username,
+
+                    DataInclusao = a.DataInclusao.ToString("dd/MM/yyyy")
+                })).ToList();
+
+                dgv_listaApostas.DataSource = apostasBuscadas;
+                dgv_listaApostas.AutoGenerateColumns = false;
+            }
+        }
+
     }
 }
