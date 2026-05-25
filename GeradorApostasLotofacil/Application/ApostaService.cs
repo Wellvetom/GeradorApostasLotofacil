@@ -1,4 +1,5 @@
 ﻿using GeradorApostasLotofacil.Domain;
+using GeradorApostasLotofacil.DTO;
 using GeradorApostasLotofacil.Infrastructure;
 using GeradorApostasLotofacil.Repository;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +8,7 @@ using System.Collections.Generic;
 using System.Text;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.Rebar;
-
+using GeradorApostasLotofacil.Helper;
 namespace GeradorApostasLotofacil.Application
 {
 
@@ -26,18 +27,26 @@ namespace GeradorApostasLotofacil.Application
             {
                 using var context = new AppDbContext();
 
-                // TOP 10 números mais frequentes
+                var random = new Random();
+
+                // TOP 10 FIXOS
                 var top10 = _repo.ObterRankingNumeros()
                     .Take(10)
                     .Select(x => x.Numero)
                     .ToList();
 
-                var random = new Random();
+                // TODOS os números possíveis
+                var todosNumeros = Enumerable.Range(1, 25).ToList();
 
-                // controle de hashes existentes no banco
-                var jogosExistentes = context.Jogos
+                // Remove os fixos
+                var numerosDisponiveis = todosNumeros
+                    .Except(top10)
+                    .ToList();
+
+                // Busca jogos já existentes
+                var hashesExistentes = context.Jogos
                     .AsEnumerable()
-                    .Select(j => GerarHashJogo(new List<int>
+                    .Select(j => JogoHelper.GerarHashJogo(new List<int>
                     {
             j.PrimeiroNumero,
             j.SegundoNumero,
@@ -57,10 +66,10 @@ namespace GeradorApostasLotofacil.Application
                     }))
                     .ToHashSet();
 
-                // controle dos jogos gerados nesta execução
-                var jogosGerados = new HashSet<string>();
+                // Controle dos jogos gerados nessa execução
+                var hashesGerados = new HashSet<string>();
 
-                // cria aposta
+                // Cria aposta
                 var aposta = new ApostaModel
                 {
                     DataInclusao = DateTime.Now,
@@ -69,33 +78,33 @@ namespace GeradorApostasLotofacil.Application
 
                 while (aposta.Jogos.Count < quantidadeJogos)
                 {
-                    // escolhe 5 aleatórios fora do TOP10
-                    var restantes = Enumerable.Range(1, 25)
-                        .Except(top10)
+                    // Escolhe SOMENTE 5 aleatórios
+                    var cincoAleatorios = numerosDisponiveis
                         .OrderBy(x => random.Next())
                         .Take(5)
                         .ToList();
 
-                    // jogo final
+                    // Junta TOP10 + 5 aleatórios
                     var numerosJogo = top10
-                        .Concat(restantes)
+                        .Concat(cincoAleatorios)
                         .OrderBy(x => x)
                         .ToList();
 
-                    // gera hash
-                    var hashJogo = GerarHashJogo(numerosJogo);
+                    // Gera hash único
+                    var hash = JogoHelper.GerarHashJogo(numerosJogo);
 
-                    // valida duplicidade
-                    if (jogosExistentes.Contains(hashJogo))
+                    // Já existe no banco?
+                    if (hashesExistentes.Contains(hash))
                         continue;
 
-                    if (jogosGerados.Contains(hashJogo))
+                    // Já foi gerado nessa aposta?
+                    if (hashesGerados.Contains(hash))
                         continue;
 
-                    // adiciona controle
-                    jogosGerados.Add(hashJogo);
+                    // Adiciona controle
+                    hashesGerados.Add(hash);
 
-                    // cria jogo
+                    // Cria jogo
                     var jogo = new JogoModel
                     {
                         PrimeiroNumero = numerosJogo[0],
@@ -125,7 +134,7 @@ namespace GeradorApostasLotofacil.Application
 
                 throw;
             }
-           
+
         }
 
         public async Task GravarApostas(ApostaModel aposta)
@@ -207,13 +216,94 @@ namespace GeradorApostasLotofacil.Application
                 throw;
             }
         }
-
-        private string GerarHashJogo(List<int> numeros)
+        public async Task<List<ApostaResultadoViewModel>> ObterApostasComResultado(int usuarioId)
         {
-            return string.Join("-",
-                numeros
-                    .OrderBy(x => x)
-                    .Select(x => x.ToString("D2")));
+            using var context = new AppDbContext();
+
+            // apostas do usuário
+            var apostasUsuario = await context.Apostas
+                .Where(a => a.UsuarioId == usuarioId)
+                .Include(a => a.Jogos)
+                .ToListAsync();
+
+            // apostas importadas pelo RPA
+            var apostasResultado = await context.Apostas
+                .Where(a => a.UsuarioId == null)
+                .Include(a => a.Jogos)
+                .ToListAsync();
+
+            var resultado = new List<ApostaResultadoViewModel>();
+
+            foreach (var aposta in apostasUsuario)
+            {
+                // busca resultado oficial da mesma data de apuração
+                var resultadoOficial = apostasResultado
+                    .FirstOrDefault(r =>
+                        r.DataApuracao.HasValue &&
+                        aposta.DataApuracao.HasValue &&
+                        r.DataApuracao.Value.Date == aposta.DataApuracao.Value.Date);
+
+                var apostaVm = new ApostaResultadoViewModel
+                {
+                    Id = aposta.Id,
+                    NuSorteio = aposta.NuSorteio,
+                    DataInclusao = aposta.DataInclusao,
+                    DataApuracao = aposta.DataApuracao,
+                    Jogos = new List<JogoResultadoViewModel>()
+                };
+
+                foreach (var jogoUsuario in aposta.Jogos)
+                {
+                    int acertos = 0;
+                    JogoViewModel jogoDto = new JogoViewModel()
+                    {
+                        PrimeiroNumero = jogoUsuario.PrimeiroNumero,
+                        SegundoNumero=jogoUsuario.SegundoNumero,
+                        TerceiroNumero=jogoUsuario.TerceiroNumero,
+                        QuartoNumero=jogoUsuario.QuartoNumero,
+                        QuintoNumero=jogoUsuario.QuintoNumero,
+                        SextoNumero=jogoUsuario.SextoNumero,
+                        SetimoNumero=jogoUsuario.SetimoNumero,
+                        OitavoNumero=jogoUsuario.OitavoNumero,
+                        NonoNumero=jogoUsuario.NonoNumero,
+                        DecimoNumero=jogoUsuario.DecimoNumero,
+                        DecimoPrimeiroNumero=jogoUsuario.DecimoPrimeiroNumero,
+                        DecimoSegundoNumero=jogoUsuario.DecimoSegundoNumero,
+                        DecimoTerceiroNumero=jogoUsuario.DecimoTerceiroNumero,
+                        DecimoQuartoNumero=jogoUsuario.DecimoQuartoNumero,
+                        DecimoQuintoNumero=jogoUsuario.DecimoQuintoNumero
+                    };
+
+                    var numerosUsuario = JogoHelper.ObterNumerosJogo(jogoUsuario);
+
+                    if (resultadoOficial != null)
+                    {
+                        var jogoResultado = resultadoOficial.Jogos.FirstOrDefault();
+
+                        if (jogoResultado != null)
+                        {
+                            var numerosResultado = JogoHelper.ObterNumerosJogo(jogoResultado);
+
+                            acertos = numerosUsuario
+                                .Intersect(numerosResultado)
+                                .Count();
+                            jogoDto.QuantidadeAcertos = acertos;
+                        }
+                    }
+
+                    apostaVm.Jogos.Add(new JogoResultadoViewModel
+                    {
+                        Id = jogoUsuario.Id,
+                        Numeros = jogoDto,
+                    });
+                }
+
+                resultado.Add(apostaVm);
+            }
+
+            return resultado;
         }
+
+
     }
 }

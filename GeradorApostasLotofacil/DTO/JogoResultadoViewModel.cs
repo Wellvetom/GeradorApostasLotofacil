@@ -1,15 +1,22 @@
-﻿using System;
+﻿using GeradorApostasLotofacil.Domain;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace GeradorApostasLotofacil.Helper
+namespace GeradorApostasLotofacil.DTO
 {
-    public class ApostaGridViewModel
+    public class JogoResultadoViewModel
     {
         public int Id { get; set; }
-        public string DataInclusao { get; set; }
-        public string Usuario { get; set; }
-        public int Acertos { get; set; }
+
+        public JogoViewModel Numeros { get; set; }
+
+    }
+
+    public class JogoViewModel
+    {
+        public int QuantidadeAcertos { get; set; }
+
         public int PrimeiroNumero { get; set; }
         public int SegundoNumero { get; set; }
         public int TerceiroNumero { get; set; }

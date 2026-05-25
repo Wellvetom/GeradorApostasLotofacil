@@ -51,14 +51,16 @@ namespace GeradorApostasLotofacil
 
                 throw;
             }
-           
+
         }
 
         private async void btnGravarApostas_Click(object sender, EventArgs e)
         {
             try
             {
-                var aposta = new ApostaModel() { Jogos = _jogosSalvos, DataInclusao = DateTime.Now, UsuarioId = _usuarioSession.UsuarioLogado.Id };
+                var retornoRobo = await new LoteriasCaixaRobot.Interface.BuscaSorteioInterface().BuscaUltimoSorteio(LoteriasCaixaRobot.Request.BaseRequest.TipoSorteio.Lotofacil);
+
+                var aposta = new ApostaModel() { Jogos = _jogosSalvos, DataInclusao = DateTime.Now, DataApuracao = retornoRobo.DataProximoSorteio, UsuarioId = _usuarioSession.UsuarioLogado.Id };
                 await _apostaService.GravarApostas(aposta);
                 MessageBox.Show("Apostas gravadas com sucesso!");
             }
@@ -68,7 +70,7 @@ namespace GeradorApostasLotofacil
 
                 throw;
             }
-            
+
         }
     }
 }

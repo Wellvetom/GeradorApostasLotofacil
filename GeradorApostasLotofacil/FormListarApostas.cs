@@ -36,31 +36,30 @@ namespace GeradorApostasLotofacil
         {
             try
             {
-                var apostas = await _apostaService.ListarApostas(_usuarioSession.UsuarioLogado.Id);
+                var apostas = await _apostaService.ObterApostasComResultado(_usuarioSession.UsuarioLogado.Id);
 
                 if (apostas.Any())
                 {
                     apostasBuscadas = apostas.SelectMany(a => a.Jogos.Select(j => new ApostaGridViewModel
                     {
                         Id = j.Id,
-                        PrimeiroNumero = j.PrimeiroNumero,
-                        SegundoNumero = j.SegundoNumero,
-                        TerceiroNumero = j.TerceiroNumero,
-                        QuartoNumero = j.QuartoNumero,
-                        QuintoNumero = j.QuintoNumero,
-                        SextoNumero = j.SextoNumero,
-                        SetimoNumero = j.SetimoNumero,
-                        OitavoNumero = j.OitavoNumero,
-                        NonoNumero = j.NonoNumero,
-                        DecimoNumero = j.DecimoNumero,
-                        DecimoPrimeiroNumero = j.DecimoPrimeiroNumero,
-                        DecimoSegundoNumero = j.DecimoSegundoNumero,
-                        DecimoTerceiroNumero = j.DecimoTerceiroNumero,
-                        DecimoQuartoNumero = j.DecimoQuartoNumero,
-                        DecimoQuintoNumero = j.DecimoQuintoNumero,
-
+                        PrimeiroNumero = j.Numeros.PrimeiroNumero,
+                        SegundoNumero = j.Numeros.SegundoNumero,
+                        TerceiroNumero = j.Numeros.TerceiroNumero,
+                        QuartoNumero = j.Numeros.QuartoNumero,
+                        QuintoNumero = j.Numeros.QuintoNumero,
+                        SextoNumero = j.Numeros.SextoNumero,
+                        SetimoNumero = j.Numeros.SetimoNumero,
+                        OitavoNumero = j.Numeros.OitavoNumero,
+                        NonoNumero = j.Numeros.NonoNumero,
+                        DecimoNumero = j.Numeros.DecimoNumero,
+                        DecimoPrimeiroNumero = j.Numeros.DecimoPrimeiroNumero,
+                        DecimoSegundoNumero = j.Numeros.DecimoSegundoNumero,
+                        DecimoTerceiroNumero = j.Numeros.DecimoTerceiroNumero,
+                        DecimoQuartoNumero = j.Numeros.DecimoQuartoNumero,
+                        DecimoQuintoNumero = j.Numeros.DecimoQuintoNumero,
                         Usuario = _usuarioSession.UsuarioLogado.Username,
-
+                        Acertos = j.Numeros.QuantidadeAcertos,
                         DataInclusao = a.DataInclusao.ToString("dd/MM/yyyy")
                     })).ToList();
 

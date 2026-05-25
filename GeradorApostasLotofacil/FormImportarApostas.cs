@@ -34,7 +34,16 @@ namespace GeradorApostasLotofacil
 
         private async void btn_importarApostas_Click(object sender, EventArgs e)
         {
-            await _apostaService.ImportarApostas();
+           var retorno =  await _apostaService.ImportarApostas();
+
+            if (retorno)
+            {
+                MessageBox.Show("Processo finalizado com sucesso");
+            }
+            else
+            {
+                MessageBox.Show("Erro interno");
+            }
         }
         private async void CarregarDados()
         {

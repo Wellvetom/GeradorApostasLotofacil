@@ -24,7 +24,7 @@ namespace GeradorApostasLotofacil.Repository
 
         public async Task<ApostaModel> ObterUltima()
         {
-            return await _context.Apostas.OrderBy(x => x.Id).LastOrDefaultAsync();
+            return await _context.Apostas.Where(x => x.UsuarioId == null).OrderBy(x => x.Id).LastOrDefaultAsync();
         }
         public async Task<List<ApostaModel>> ObterUltimas10()
         {
