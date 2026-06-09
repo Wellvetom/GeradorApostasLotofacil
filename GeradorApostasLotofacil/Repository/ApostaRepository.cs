@@ -28,7 +28,7 @@ namespace GeradorApostasLotofacil.Repository
         }
         public async Task<List<ApostaModel>> ObterUltimas10()
         {
-            return _context.Apostas.Include(x => x.Jogos).Take(10).ToList();
+            return _context.Apostas.Include(x => x.Jogos).OrderByDescending(x=>x.DataInclusao).Take(10).ToList();
         }
         public List<(int Numero, int Quantidade)> ObterRankingNumeros()
         {

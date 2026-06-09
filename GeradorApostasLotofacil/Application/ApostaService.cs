@@ -29,8 +29,8 @@ namespace GeradorApostasLotofacil.Application
 
                 var random = new Random();
 
-                // TOP 10 FIXOS
-                var top10 = _repo.ObterRankingNumeros()
+                // TOP 12 FIXOS
+                var top12 = _repo.ObterRankingNumeros()
                     .Take(10)
                     .Select(x => x.Numero)
                     .ToList();
@@ -40,7 +40,7 @@ namespace GeradorApostasLotofacil.Application
 
                 // Remove os fixos
                 var numerosDisponiveis = todosNumeros
-                    .Except(top10)
+                    .Except(top12)
                     .ToList();
 
                 // Busca jogos já existentes
@@ -78,15 +78,15 @@ namespace GeradorApostasLotofacil.Application
 
                 while (aposta.Jogos.Count < quantidadeJogos)
                 {
-                    // Escolhe SOMENTE 5 aleatórios
-                    var cincoAleatorios = numerosDisponiveis
+                    // Escolhe SOMENTE 3 aleatórios
+                    var tresAleatorios = numerosDisponiveis
                         .OrderBy(x => random.Next())
-                        .Take(5)
+                        .Take(3)
                         .ToList();
 
-                    // Junta TOP10 + 5 aleatórios
-                    var numerosJogo = top10
-                        .Concat(cincoAleatorios)
+                    // Junta TOP12 + 3 aleatórios
+                    var numerosJogo = top12
+                        .Concat(tresAleatorios)
                         .OrderBy(x => x)
                         .ToList();
 
@@ -169,7 +169,7 @@ namespace GeradorApostasLotofacil.Application
 
                     while (finaliza)
                     {
-
+                        idSor++;
                         var buscaSorteio = await new LoteriasCaixaRobot.Interface.BuscaSorteioInterface().BuscaSorteio(LoteriasCaixaRobot.Request.BaseRequest.TipoSorteio.Lotofacil, idSorteio: idSor);
 
                         ApostaModel gravarAposta = new ApostaModel()
@@ -202,7 +202,6 @@ namespace GeradorApostasLotofacil.Application
 
                         await _repo.Salvar(gravarAposta);
 
-                        idSor++;
                         if (idSor == NuSorteio)
                             finaliza = false;
                     }
