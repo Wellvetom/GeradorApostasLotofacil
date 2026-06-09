@@ -221,7 +221,7 @@ namespace GeradorApostasLotofacil.Application
 
             // apostas do usuário
             var apostasUsuario = await context.Apostas
-                .Where(a => a.UsuarioId == usuarioId)
+                .Where(a => a.UsuarioId == usuarioId && a.DataExclusao == null)
                 .Include(a => a.Jogos)
                 .ToListAsync();
 
@@ -257,20 +257,20 @@ namespace GeradorApostasLotofacil.Application
                     JogoViewModel jogoDto = new JogoViewModel()
                     {
                         PrimeiroNumero = jogoUsuario.PrimeiroNumero,
-                        SegundoNumero=jogoUsuario.SegundoNumero,
-                        TerceiroNumero=jogoUsuario.TerceiroNumero,
-                        QuartoNumero=jogoUsuario.QuartoNumero,
-                        QuintoNumero=jogoUsuario.QuintoNumero,
-                        SextoNumero=jogoUsuario.SextoNumero,
-                        SetimoNumero=jogoUsuario.SetimoNumero,
-                        OitavoNumero=jogoUsuario.OitavoNumero,
-                        NonoNumero=jogoUsuario.NonoNumero,
-                        DecimoNumero=jogoUsuario.DecimoNumero,
-                        DecimoPrimeiroNumero=jogoUsuario.DecimoPrimeiroNumero,
-                        DecimoSegundoNumero=jogoUsuario.DecimoSegundoNumero,
-                        DecimoTerceiroNumero=jogoUsuario.DecimoTerceiroNumero,
-                        DecimoQuartoNumero=jogoUsuario.DecimoQuartoNumero,
-                        DecimoQuintoNumero=jogoUsuario.DecimoQuintoNumero
+                        SegundoNumero = jogoUsuario.SegundoNumero,
+                        TerceiroNumero = jogoUsuario.TerceiroNumero,
+                        QuartoNumero = jogoUsuario.QuartoNumero,
+                        QuintoNumero = jogoUsuario.QuintoNumero,
+                        SextoNumero = jogoUsuario.SextoNumero,
+                        SetimoNumero = jogoUsuario.SetimoNumero,
+                        OitavoNumero = jogoUsuario.OitavoNumero,
+                        NonoNumero = jogoUsuario.NonoNumero,
+                        DecimoNumero = jogoUsuario.DecimoNumero,
+                        DecimoPrimeiroNumero = jogoUsuario.DecimoPrimeiroNumero,
+                        DecimoSegundoNumero = jogoUsuario.DecimoSegundoNumero,
+                        DecimoTerceiroNumero = jogoUsuario.DecimoTerceiroNumero,
+                        DecimoQuartoNumero = jogoUsuario.DecimoQuartoNumero,
+                        DecimoQuintoNumero = jogoUsuario.DecimoQuintoNumero
                     };
 
                     var numerosUsuario = JogoHelper.ObterNumerosJogo(jogoUsuario);

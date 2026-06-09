@@ -24,11 +24,11 @@ namespace GeradorApostasLotofacil.Repository
 
         public async Task<ApostaModel> ObterUltima()
         {
-            return await _context.Apostas.Where(x => x.UsuarioId == null).OrderBy(x => x.Id).LastOrDefaultAsync();
+            return await _context.Apostas.Where(x => x.UsuarioId == null && x.DataExclusao == null).OrderBy(x => x.Id).LastOrDefaultAsync();
         }
         public async Task<List<ApostaModel>> ObterUltimas10()
         {
-            return _context.Apostas.Include(x => x.Jogos).OrderByDescending(x=>x.DataInclusao).Take(10).ToList();
+            return _context.Apostas.Include(x => x.Jogos).OrderByDescending(x => x.DataInclusao).Take(10).ToList();
         }
         public List<(int Numero, int Quantidade)> ObterRankingNumeros()
         {
@@ -67,11 +67,11 @@ namespace GeradorApostasLotofacil.Repository
 
         public async Task<List<ApostaModel>> ObterTodas()
         {
-            return _context.Apostas.ToList();
+            return _context.Apostas.Where(x => x.DataExclusao == null).ToList();
         }
         public async Task<List<ApostaModel>> ObterTodasPorId(int usuarioId)
         {
-            return await _context.Apostas.Include(x => x.Jogos).Where(x => x.UsuarioId == usuarioId).ToListAsync();
+            return await _context.Apostas.Include(x => x.Jogos).Where(x => x.UsuarioId == usuarioId && x.DataExclusao == null).ToListAsync();
         }
     }
 }

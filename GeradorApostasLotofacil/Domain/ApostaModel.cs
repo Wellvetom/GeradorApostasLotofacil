@@ -11,6 +11,8 @@ namespace GeradorApostasLotofacil.Domain
         public List<JogoModel> Jogos { get; set; }
         public DateTime DataInclusao { get; set; }
         public DateTime? DataApuracao { get; set; }
+        public DateTime? DataExclusao { get; set; }
+
         public int? UsuarioId { get; set; }
         public UsuarioModel? Usuario { get; set; }
     }
