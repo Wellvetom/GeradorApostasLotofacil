@@ -18,17 +18,17 @@ namespace GeradorApostasLotofacil.DTO
         public List<(int Numero, int Frequencia)> NumerosFrequentes { get; set; } = new();
 
         /// <summary>
-        /// Últimas 5 apostas com data e quantidade de jogos
+        /// Últimos 10 jogos do usuário
         /// </summary>
-        public List<DashboardApostaResumo> UltimasApostas { get; set; } = new();
+        public List<DashboardJogoResumo> UltimosJogos { get; set; } = new();
     }
 
-    public class DashboardApostaResumo
+    public class DashboardJogoResumo
     {
         public int Id { get; set; }
-        public DateTime DataInclusao { get; set; }
-        public DateTime? DataApuracao { get; set; }
-        public int QuantidadeJogos { get; set; }
-        public int MelhorAcerto { get; set; }
+        public DateTime DataAposta { get; set; }
+        public DateTime? DataSorteio { get; set; }
+        public List<int> Numeros { get; set; } = new();
+        public int Acertos { get; set; }
     }
 }

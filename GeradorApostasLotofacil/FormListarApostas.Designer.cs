@@ -41,6 +41,7 @@ namespace GeradorApostasLotofacil
             DecimoQuintoNumero = new DataGridViewTextBoxColumn();
             colAcertos = new DataGridViewTextBoxColumn();
             colData = new DataGridViewTextBoxColumn();
+            colResortear = new DataGridViewButtonColumn();
             panelTop.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgv_listaApostas).BeginInit();
             SuspendLayout();
@@ -115,7 +116,7 @@ namespace GeradorApostasLotofacil
             dgv_listaApostas.ColumnHeadersDefaultCellStyle = headerStyle;
             dgv_listaApostas.ColumnHeadersHeight = 36;
             dgv_listaApostas.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            dgv_listaApostas.Columns.AddRange(new DataGridViewColumn[] { colData, PrimeiroNumero, SegundoNumero, TerceiroNumero, QuartoNumero, QuintoNumero, SextoNumero, SetimoNumero, OitavoNumero, NonoNumero, DecimoNumero, DecimoPrimeiroNumero, DecimoSegundoNumero, DecimoTerceiroNumero, DecimoQuartoNumero, DecimoQuintoNumero, colAcertos });
+            dgv_listaApostas.Columns.AddRange(new DataGridViewColumn[] { colData, PrimeiroNumero, SegundoNumero, TerceiroNumero, QuartoNumero, QuintoNumero, SextoNumero, SetimoNumero, OitavoNumero, NonoNumero, DecimoNumero, DecimoPrimeiroNumero, DecimoSegundoNumero, DecimoTerceiroNumero, DecimoQuartoNumero, DecimoQuintoNumero, colAcertos, colResortear });
             cellStyle.BackColor = Color.FromArgb(40, 42, 58);
             cellStyle.ForeColor = Color.White;
             cellStyle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
@@ -256,6 +257,24 @@ namespace GeradorApostasLotofacil
             colAcertos.Name = "colAcertos";
             colAcertos.FillWeight = 60;
             // 
+            // colResortear
+            // 
+            colResortear.HeaderText = "";
+            colResortear.Name = "colResortear";
+            colResortear.Text = "🔄 Resortear";
+            colResortear.UseColumnTextForButtonValue = true;
+            colResortear.FillWeight = 90;
+            colResortear.FlatStyle = FlatStyle.Flat;
+            colResortear.DefaultCellStyle = new DataGridViewCellStyle
+            {
+                BackColor = Color.FromArgb(63, 81, 181),
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                SelectionBackColor = Color.FromArgb(63, 81, 181),
+                SelectionForeColor = Color.White,
+                Alignment = DataGridViewContentAlignment.MiddleCenter
+            };
+            // 
             // FormListarApostas
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -266,6 +285,7 @@ namespace GeradorApostasLotofacil
             Controls.Add(panelTop);
             Name = "FormListarApostas";
             Text = "FormListarApostas";
+            dgv_listaApostas.CellContentClick += dgv_listaApostas_CellContentClick;
             panelTop.ResumeLayout(false);
             panelTop.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgv_listaApostas).EndInit();
@@ -296,5 +316,6 @@ namespace GeradorApostasLotofacil
         private DataGridViewTextBoxColumn DecimoQuintoNumero;
         private DataGridViewTextBoxColumn colAcertos;
         private DataGridViewTextBoxColumn colData;
+        private DataGridViewButtonColumn colResortear;
     }
 }

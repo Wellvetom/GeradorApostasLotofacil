@@ -54,6 +54,7 @@ namespace GeradorApostasLotofacil.Application
                 // Calcular acertos por jogo
                 var distribuicao = new Dictionary<int, int>();
                 int melhorAcertoGeral = 0;
+                var ultimosJogosList = new List<DashboardJogoResumo>();
 
                 foreach (var aposta in apostasUsuario)
                 {
@@ -62,8 +63,6 @@ namespace GeradorApostasLotofacil.Application
                             r.DataApuracao.HasValue &&
                             aposta.DataApuracao.HasValue &&
                             r.DataApuracao.Value.Date == aposta.DataApuracao.Value.Date);
-
-                    int melhorAcertoAposta = 0;
 
                     foreach (var jogo in aposta.Jogos)
                     {
@@ -86,26 +85,23 @@ namespace GeradorApostasLotofacil.Application
                             distribuicao[acertos] = count + 1;
                         }
 
-                        if (acertos > melhorAcertoAposta)
-                            melhorAcertoAposta = acertos;
-
                         if (acertos > melhorAcertoGeral)
                             melhorAcertoGeral = acertos;
-                    }
 
-                    // Últimas 5 apostas
-                    if (dashboard.UltimasApostas.Count < 5)
-                    {
-                        dashboard.UltimasApostas.Add(new DashboardApostaResumo
+                        // Coleta jogos para lista dos últimos 10
+                        ultimosJogosList.Add(new DashboardJogoResumo
                         {
-                            Id = aposta.Id,
-                            DataInclusao = aposta.DataInclusao,
-                            DataApuracao = aposta.DataApuracao,
-                            QuantidadeJogos = aposta.Jogos.Count,
-                            MelhorAcerto = melhorAcertoAposta
+                            Id = jogo.Id,
+                            DataAposta = aposta.DataInclusao,
+                            DataSorteio = aposta.DataApuracao,
+                            Numeros = jogo.Numeros,
+                            Acertos = acertos
                         });
                     }
                 }
+
+                // Últimos 10 jogos (já estão ordenados por data decrescente da aposta)
+                dashboard.UltimosJogos = ultimosJogosList.Take(10).ToList();
 
                 dashboard.DistribuicaoAcertos = distribuicao;
                 dashboard.MelhorAcerto = melhorAcertoGeral;

@@ -17,25 +17,30 @@ namespace GeradorApostasLotofacil.Application
             _context = context;
         }
 
-        public ApostaModel GerarJogosInteligentes(decimal quantidadeJogos)
+        public ApostaModel GerarJogosInteligentes(decimal quantidadeJogos, int qtdMaisSorteados = 12, int qtdMenosSorteados = 0)
         {
             var random = new Random();
 
-            // TOP 12 FIXOS
-            var top12 = _repo.ObterRankingNumeros()
-                .Take(12)
+            // Ranking completo ordenado por frequência (mais sorteados primeiro)
+            var ranking = _repo.ObterRankingNumeros();
+
+            // Números mais sorteados (top N do ranking)
+            var maisSorteados = ranking
+                .Take(15)
                 .Select(x => x.Numero)
                 .ToList();
 
-            // TODOS os números possíveis
-            var todosNumeros = Enumerable.Range(1, 25).ToList();
-
-            // Remove os fixos
-            var numerosDisponiveis = todosNumeros
-                .Except(top12)
+            // Números menos sorteados (últimos 15 do ranking)
+            var menosSorteados = ranking
+                .OrderBy(x => x.Quantidade)
+                .Take(15)
+                .Select(x => x.Numero)
                 .ToList();
 
-            // Busca jogos já existentes
+            // TODOS os números possíveis da Lotofácil
+            var todosNumeros = Enumerable.Range(1, 25).ToList();
+
+            // Busca jogos já existentes para garantir ineditismo
             var hashesExistentes = _context.Jogos
                 .AsEnumerable()
                 .Select(j => JogoHelper.GerarHashJogo(j.Numeros))
@@ -51,17 +56,41 @@ namespace GeradorApostasLotofacil.Application
                 Jogos = new List<JogoModel>()
             };
 
+            // Quantidade de números aleatórios (restante para completar 15)
+            int qtdAleatorios = 15 - qtdMaisSorteados - qtdMenosSorteados;
+
             while (aposta.Jogos.Count < (int)quantidadeJogos)
             {
-                // Escolhe SOMENTE 3 aleatórios
-                var tresAleatorios = numerosDisponiveis
+                // Seleciona N números dos mais sorteados (aleatoriamente dentre os top 15)
+                var escolhidosMais = maisSorteados
                     .OrderBy(x => random.Next())
-                    .Take(3)
+                    .Take(qtdMaisSorteados)
                     .ToList();
 
-                // Junta TOP12 + 3 aleatórios
-                var numerosJogo = top12
-                    .Concat(tresAleatorios)
+                // Seleciona N números dos menos sorteados (aleatoriamente dentre os bottom 15)
+                var escolhidosMenos = menosSorteados
+                    .OrderBy(x => random.Next())
+                    .Take(qtdMenosSorteados)
+                    .ToList();
+
+                // Números já usados
+                var numerosUsados = escolhidosMais.Concat(escolhidosMenos).ToHashSet();
+
+                // Números disponíveis para preencher o restante (exclui os já usados)
+                var numerosDisponiveis = todosNumeros
+                    .Where(n => !numerosUsados.Contains(n))
+                    .ToList();
+
+                // Escolhe aleatórios dos restantes
+                var aleatorios = numerosDisponiveis
+                    .OrderBy(x => random.Next())
+                    .Take(qtdAleatorios)
+                    .ToList();
+
+                // Monta o jogo final com 15 números
+                var numerosJogo = escolhidosMais
+                    .Concat(escolhidosMenos)
+                    .Concat(aleatorios)
                     .OrderBy(x => x)
                     .ToList();
 

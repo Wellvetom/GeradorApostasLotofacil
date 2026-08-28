@@ -9,6 +9,7 @@ namespace GeradorApostasLotofacil
         private readonly IDashboardService _dashboardService;
         private readonly UsuarioSession _usuarioSession;
         private DashboardViewModel? _dados;
+        private readonly LoadingPanel _loadingPanel;
 
         public FormDashboard(
             IDashboardService dashboardService,
@@ -17,11 +18,26 @@ namespace GeradorApostasLotofacil
             InitializeComponent();
             _dashboardService = dashboardService;
             _usuarioSession = usuarioSession;
+
+            _loadingPanel = new LoadingPanel();
+            this.Controls.Add(_loadingPanel);
         }
 
         private async void FormDashboard_Load(object sender, EventArgs e)
         {
+            foreach (Control ctrl in this.Controls)
+            {
+                if (ctrl != _loadingPanel)
+                    ctrl.Visible = false;
+            }
+
             await CarregarDashboard();
+
+            foreach (Control ctrl in this.Controls)
+            {
+                if (ctrl != _loadingPanel)
+                    ctrl.Visible = true;
+            }
         }
 
         private async Task CarregarDashboard()
@@ -34,20 +50,20 @@ namespace GeradorApostasLotofacil
                     return;
                 }
 
-                lblStatus.Text = "Carregando dados...";
-                lblStatus.Visible = true;
+                _loadingPanel.Exibir("Carregando dashboard...");
 
-                _dados = await _dashboardService.ObterDashboard(_usuarioSession.UsuarioLogado!.Id);
+                _dados = await Task.Run(async () => await _dashboardService.ObterDashboard(_usuarioSession.UsuarioLogado!.Id));
 
                 PreencherCards();
                 PreencherNumerosFrequentes();
-                PreencherUltimasApostas();
+                PreencherUltimosJogos();
                 panelGraficoAcertos.Invalidate();
 
-                lblStatus.Visible = false;
+                _loadingPanel.Ocultar();
             }
             catch (Exception ex)
             {
+                _loadingPanel.Ocultar();
                 lblStatus.Text = $"Erro ao carregar: {ex.Message}";
                 MessageBox.Show($"Erro ao carregar dashboard: {ex.Message}", "Erro",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -97,20 +113,19 @@ namespace GeradorApostasLotofacil
             }
         }
 
-        private void PreencherUltimasApostas()
+        private void PreencherUltimosJogos()
         {
             try
             {
                 if (_dados == null) return;
 
-                dgvUltimasApostas.DataSource = _dados.UltimasApostas
-                    .Select(a => new
+                dgvUltimasApostas.DataSource = _dados.UltimosJogos
+                    .Select(j => new
                     {
-                        a.Id,
-                        Data = a.DataInclusao.ToString("dd/MM/yyyy"),
-                        Apuração = a.DataApuracao?.ToString("dd/MM/yyyy") ?? "Pendente",
-                        Jogos = a.QuantidadeJogos,
-                        MelhorAcerto = a.MelhorAcerto > 0 ? $"{a.MelhorAcerto}" : "—"
+                        Data = j.DataAposta.ToString("dd/MM/yyyy"),
+                        Sorteio = j.DataSorteio?.ToString("dd/MM/yyyy") ?? "Pendente",
+                        Números = string.Join(" - ", j.Numeros.Select(n => n.ToString("D2"))),
+                        Acertos = j.Acertos > 0 ? $"{j.Acertos}" : "—"
                     })
                     .ToList();
 
@@ -118,13 +133,9 @@ namespace GeradorApostasLotofacil
             }
             catch (Exception ex)
             {
-                var apostasInfo = _dados?.UltimasApostas != null
-                    ? $"Count={_dados.UltimasApostas.Count}, Itens=[{string.Join(", ", _dados.UltimasApostas.Select(a => $"(Id={a.Id}, Data={a.DataInclusao}, Jogos={a.QuantidadeJogos})"))}]"
-                    : "null";
-
                 MessageBox.Show(
-                    $"Erro ao preencher últimas apostas.\n\nDados: {apostasInfo}\n\nErro: {ex.Message}\n\n{ex.StackTrace}",
-                    "Erro - PreencherUltimasApostas", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    $"Erro ao preencher últimos jogos.\n\nErro: {ex.Message}",
+                    "Erro - PreencherUltimosJogos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 

@@ -297,7 +297,7 @@ namespace GeradorApostasLotofacil
             lblTituloUltimasApostas.Name = "lblTituloUltimasApostas";
             lblTituloUltimasApostas.Padding = new Padding(5);
             lblTituloUltimasApostas.Size = new Size(680, 30);
-            lblTituloUltimasApostas.Text = "🕐 Últimas 5 Apostas";
+            lblTituloUltimasApostas.Text = "🕐 Últimos 10 Jogos";
 
             // 
             // dgvUltimasApostas

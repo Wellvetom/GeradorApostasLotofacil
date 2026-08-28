@@ -9,6 +9,7 @@ namespace GeradorApostasLotofacil
         private readonly IApostaService _apostaService;
         private readonly IImportacaoService _importacaoService;
         private readonly UsuarioSession _usuarioSession;
+        private readonly LoadingPanel _loadingPanel;
 
         public FormImportarApostas(
             IApostaService apostaService,
@@ -19,6 +20,10 @@ namespace GeradorApostasLotofacil
             _apostaService = apostaService;
             _importacaoService = importacaoService;
             _usuarioSession = usuarioSession;
+
+            _loadingPanel = new LoadingPanel();
+            this.Controls.Add(_loadingPanel);
+
             CarregarDados();
             CarregaUltimasApostas();
         }
@@ -27,7 +32,11 @@ namespace GeradorApostasLotofacil
         {
             try
             {
+                _loadingPanel.Exibir("Importando resultados...");
+
                 var retorno = await _importacaoService.ImportarApostas();
+
+                _loadingPanel.Ocultar();
 
                 if (retorno)
                 {
@@ -40,6 +49,7 @@ namespace GeradorApostasLotofacil
             }
             catch (Exception ex)
             {
+                _loadingPanel.Ocultar();
                 MessageBox.Show($"Erro ao importar apostas: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -48,6 +58,8 @@ namespace GeradorApostasLotofacil
         {
             try
             {
+                _loadingPanel.Exibir("Carregando dados do sorteio...");
+
                 var retornoRobo = await new LoteriasCaixaRobot.Interface.BuscaSorteioInterface()
                     .BuscaUltimoSorteio(LoteriasCaixaRobot.Request.BaseRequest.TipoSorteio.Lotofacil);
 
@@ -55,9 +67,12 @@ namespace GeradorApostasLotofacil
                 {
                     label_dadosApostas.Text = $"Ultimo sorteio realizado em: {retornoRobo.DataUltimoSorteio.ToString("dd/MM/yyyy")}\nO proximo sorteio será realizado em: {retornoRobo.DataProximoSorteio.ToString("dd/MM/yyyy")} ";
                 }
+
+                _loadingPanel.Ocultar();
             }
             catch (Exception ex)
             {
+                _loadingPanel.Ocultar();
                 label_dadosApostas.Text = "Não foi possível carregar dados do sorteio.";
                 System.Diagnostics.Debug.WriteLine($"Erro ao carregar dados: {ex.Message}");
             }
@@ -76,7 +91,7 @@ namespace GeradorApostasLotofacil
                         Id = j.Id,
                         Numeros = j.Numeros,
                         Usuario = _usuarioSession.UsuarioLogado?.Username ?? "Sistema",
-                        DataInclusao = a.DataInclusao.ToString("dd/MM/yyyy")
+                        DataInclusao = a.DataApuracao?.ToString("dd/MM/yyyy") ?? "Pendente"
                     })).ToList();
 
                     dgv_listaApostas.DataSource = apostasBuscadas;

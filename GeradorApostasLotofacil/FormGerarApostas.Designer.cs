@@ -24,6 +24,11 @@ namespace GeradorApostasLotofacil
             numberBox_quantidadeApostas = new NumericUpDown();
             label_apostasIneditas = new Label();
             radioBtn_apostasIneditas = new RadioButton();
+            label_maisSorteados = new Label();
+            numMaisSorteados = new NumericUpDown();
+            label_menosSorteados = new Label();
+            numMenosSorteados = new NumericUpDown();
+            label_aleatorios = new Label();
             btn_gerarApostas = new Button();
             btnGravarApostas = new Button();
             dgv_listaApostas = new DataGridView();
@@ -45,6 +50,8 @@ namespace GeradorApostasLotofacil
             panelTop.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgv_listaApostas).BeginInit();
             ((System.ComponentModel.ISupportInitialize)numberBox_quantidadeApostas).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numMaisSorteados).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)numMenosSorteados).BeginInit();
             SuspendLayout();
             // 
             // panelTop
@@ -54,13 +61,18 @@ namespace GeradorApostasLotofacil
             panelTop.Controls.Add(numberBox_quantidadeApostas);
             panelTop.Controls.Add(label_apostasIneditas);
             panelTop.Controls.Add(radioBtn_apostasIneditas);
+            panelTop.Controls.Add(label_maisSorteados);
+            panelTop.Controls.Add(numMaisSorteados);
+            panelTop.Controls.Add(label_menosSorteados);
+            panelTop.Controls.Add(numMenosSorteados);
+            panelTop.Controls.Add(label_aleatorios);
             panelTop.Controls.Add(btn_gerarApostas);
             panelTop.Controls.Add(btnGravarApostas);
             panelTop.Dock = DockStyle.Top;
             panelTop.Location = new Point(0, 0);
             panelTop.Name = "panelTop";
             panelTop.Padding = new Padding(15);
-            panelTop.Size = new Size(936, 110);
+            panelTop.Size = new Size(936, 170);
             // 
             // label_gerarAposta
             // 
@@ -76,20 +88,21 @@ namespace GeradorApostasLotofacil
             numberBox_quantidadeApostas.BackColor = Color.FromArgb(55, 65, 82);
             numberBox_quantidadeApostas.ForeColor = Color.White;
             numberBox_quantidadeApostas.Font = new Font("Segoe UI", 12F);
-            numberBox_quantidadeApostas.Location = new Point(18, 55);
+            numberBox_quantidadeApostas.Location = new Point(18, 58);
             numberBox_quantidadeApostas.Name = "numberBox_quantidadeApostas";
-            numberBox_quantidadeApostas.Size = new Size(120, 34);
+            numberBox_quantidadeApostas.Size = new Size(100, 34);
             numberBox_quantidadeApostas.BorderStyle = BorderStyle.FixedSingle;
             numberBox_quantidadeApostas.Minimum = 1;
             numberBox_quantidadeApostas.Maximum = 100;
             numberBox_quantidadeApostas.Value = 5;
+            numberBox_quantidadeApostas.TextAlign = HorizontalAlignment.Center;
             // 
             // label_apostasIneditas
             // 
             label_apostasIneditas.AutoSize = true;
             label_apostasIneditas.Font = new Font("Segoe UI", 10F);
             label_apostasIneditas.ForeColor = Color.FromArgb(180, 180, 200);
-            label_apostasIneditas.Location = new Point(160, 62);
+            label_apostasIneditas.Location = new Point(135, 65);
             label_apostasIneditas.Name = "label_apostasIneditas";
             label_apostasIneditas.Text = "Apenas inéditas:";
             // 
@@ -97,11 +110,68 @@ namespace GeradorApostasLotofacil
             // 
             radioBtn_apostasIneditas.AutoSize = true;
             radioBtn_apostasIneditas.ForeColor = Color.White;
-            radioBtn_apostasIneditas.Location = new Point(295, 63);
+            radioBtn_apostasIneditas.Location = new Point(270, 66);
             radioBtn_apostasIneditas.Name = "radioBtn_apostasIneditas";
             radioBtn_apostasIneditas.Size = new Size(17, 16);
             radioBtn_apostasIneditas.TabStop = true;
             radioBtn_apostasIneditas.UseVisualStyleBackColor = true;
+            // 
+            // label_maisSorteados
+            // 
+            label_maisSorteados.AutoSize = true;
+            label_maisSorteados.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            label_maisSorteados.ForeColor = Color.FromArgb(130, 200, 130);
+            label_maisSorteados.Location = new Point(18, 115);
+            label_maisSorteados.Name = "label_maisSorteados";
+            label_maisSorteados.Text = "📈 Mais sorteados:";
+            // 
+            // numMaisSorteados
+            // 
+            numMaisSorteados.BackColor = Color.FromArgb(55, 65, 82);
+            numMaisSorteados.ForeColor = Color.White;
+            numMaisSorteados.Font = new Font("Segoe UI", 11F);
+            numMaisSorteados.Location = new Point(180, 111);
+            numMaisSorteados.Name = "numMaisSorteados";
+            numMaisSorteados.Size = new Size(65, 32);
+            numMaisSorteados.BorderStyle = BorderStyle.FixedSingle;
+            numMaisSorteados.Minimum = 0;
+            numMaisSorteados.Maximum = 15;
+            numMaisSorteados.Value = 10;
+            numMaisSorteados.TextAlign = HorizontalAlignment.Center;
+            numMaisSorteados.ValueChanged += numMaisMenos_ValueChanged;
+            // 
+            // label_menosSorteados
+            // 
+            label_menosSorteados.AutoSize = true;
+            label_menosSorteados.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            label_menosSorteados.ForeColor = Color.FromArgb(255, 150, 100);
+            label_menosSorteados.Location = new Point(280, 115);
+            label_menosSorteados.Name = "label_menosSorteados";
+            label_menosSorteados.Text = "📉 Menos sorteados:";
+            // 
+            // numMenosSorteados
+            // 
+            numMenosSorteados.BackColor = Color.FromArgb(55, 65, 82);
+            numMenosSorteados.ForeColor = Color.White;
+            numMenosSorteados.Font = new Font("Segoe UI", 11F);
+            numMenosSorteados.Location = new Point(460, 111);
+            numMenosSorteados.Name = "numMenosSorteados";
+            numMenosSorteados.Size = new Size(65, 32);
+            numMenosSorteados.BorderStyle = BorderStyle.FixedSingle;
+            numMenosSorteados.Minimum = 0;
+            numMenosSorteados.Maximum = 15;
+            numMenosSorteados.Value = 2;
+            numMenosSorteados.TextAlign = HorizontalAlignment.Center;
+            numMenosSorteados.ValueChanged += numMaisMenos_ValueChanged;
+            // 
+            // label_aleatorios
+            // 
+            label_aleatorios.AutoSize = true;
+            label_aleatorios.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            label_aleatorios.ForeColor = Color.FromArgb(100, 180, 255);
+            label_aleatorios.Location = new Point(560, 115);
+            label_aleatorios.Name = "label_aleatorios";
+            label_aleatorios.Text = "🎲 Aleatórios: 3";
             // 
             // btn_gerarApostas
             // 
@@ -164,7 +234,7 @@ namespace GeradorApostasLotofacil
             dgv_listaApostas.Dock = DockStyle.Fill;
             dgv_listaApostas.EnableHeadersVisualStyles = false;
             dgv_listaApostas.GridColor = Color.FromArgb(55, 58, 78);
-            dgv_listaApostas.Location = new Point(0, 110);
+            dgv_listaApostas.Location = new Point(0, 170);
             dgv_listaApostas.Name = "dgv_listaApostas";
             dgv_listaApostas.ReadOnly = true;
             dgv_listaApostas.RowHeadersVisible = false;
@@ -278,6 +348,8 @@ namespace GeradorApostasLotofacil
             panelTop.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dgv_listaApostas).EndInit();
             ((System.ComponentModel.ISupportInitialize)numberBox_quantidadeApostas).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numMaisSorteados).EndInit();
+            ((System.ComponentModel.ISupportInitialize)numMenosSorteados).EndInit();
             ResumeLayout(false);
         }
 
@@ -290,6 +362,11 @@ namespace GeradorApostasLotofacil
         private NumericUpDown numberBox_quantidadeApostas;
         private Label label_apostasIneditas;
         private RadioButton radioBtn_apostasIneditas;
+        private Label label_maisSorteados;
+        private NumericUpDown numMaisSorteados;
+        private Label label_menosSorteados;
+        private NumericUpDown numMenosSorteados;
+        private Label label_aleatorios;
         private Button btnGravarApostas;
         private DataGridViewTextBoxColumn PrimeiroNumero;
         private DataGridViewTextBoxColumn SegundoNumero;
