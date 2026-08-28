@@ -1,16 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace GeradorApostasLotofacil.Application
 {
     public class NavigationService
     {
         private readonly Panel _panel;
-   
-        public NavigationService(Panel panel)
+        private readonly IServiceProvider _serviceProvider;
+
+        public NavigationService(Panel panel, IServiceProvider serviceProvider)
         {
             _panel = panel;
+            _serviceProvider = serviceProvider;
         }
 
         public void NavegarPara(Form form)
@@ -25,9 +25,10 @@ namespace GeradorApostasLotofacil.Application
             form.Show();
         }
 
-        public void NavegarPara<T>() where T : Form, new()
+        public void NavegarPara<T>() where T : Form
         {
-            NavegarPara(new T());
+            var form = _serviceProvider.GetRequiredService<T>();
+            NavegarPara(form);
         }
     }
 }

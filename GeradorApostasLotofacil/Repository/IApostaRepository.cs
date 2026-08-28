@@ -1,16 +1,14 @@
-﻿using GeradorApostasLotofacil.Domain;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using GeradorApostasLotofacil.Domain;
 
 namespace GeradorApostasLotofacil.Repository
 {
-    public interface ApostaRepositoryInterface
+    public interface IApostaRepository
     {
         Task Salvar(ApostaModel aposta);
         Task<List<ApostaModel>> ObterTodas();
         Task<List<ApostaModel>> ObterUltimas10();
-        Task<ApostaModel> ObterUltima();
+        Task<ApostaModel?> ObterUltima();
         Task<List<ApostaModel>> ObterTodasPorId(int usuarioId);
+        List<(int Numero, int Quantidade)> ObterRankingNumeros();
     }
 }

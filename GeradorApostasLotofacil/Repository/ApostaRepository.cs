@@ -1,13 +1,10 @@
-﻿using GeradorApostasLotofacil.Domain;
+using GeradorApostasLotofacil.Domain;
 using GeradorApostasLotofacil.Infrastructure;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace GeradorApostasLotofacil.Repository
 {
-    public class ApostaRepository : ApostaRepositoryInterface
+    public class ApostaRepository : IApostaRepository
     {
         private readonly AppDbContext _context;
 
@@ -19,59 +16,56 @@ namespace GeradorApostasLotofacil.Repository
         public async Task Salvar(ApostaModel aposta)
         {
             _context.Apostas.Add(aposta);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public async Task<ApostaModel> ObterUltima()
+        public async Task<ApostaModel?> ObterUltima()
         {
-            return await _context.Apostas.Where(x => x.UsuarioId == null && x.DataExclusao == null).OrderBy(x => x.Id).LastOrDefaultAsync();
+            return await _context.Apostas
+                .Where(x => x.UsuarioId == null && x.DataExclusao == null)
+                .OrderByDescending(x => x.Id)
+                .FirstOrDefaultAsync();
         }
+
         public async Task<List<ApostaModel>> ObterUltimas10()
         {
-            return _context.Apostas.Include(x => x.Jogos).OrderByDescending(x => x.DataInclusao).Take(10).ToList();
+            return await _context.Apostas
+                .Include(x => x.Jogos)
+                .OrderByDescending(x => x.DataInclusao)
+                .Take(10)
+                .ToListAsync();
         }
+
         public List<(int Numero, int Quantidade)> ObterRankingNumeros()
         {
+            var numeros = _context.Jogos.AsEnumerable();
 
-            var numeros = _context.Jogos
-                .AsEnumerable();
-            // traz para memória
-            var retorno = numeros.SelectMany(j => new List<int>
-                {
-            j.PrimeiroNumero,
-            j.SegundoNumero,
-            j.TerceiroNumero,
-            j.QuartoNumero,
-            j.QuintoNumero,
-            j.SextoNumero,
-            j.SetimoNumero,
-            j.OitavoNumero,
-            j.NonoNumero,
-            j.DecimoNumero,
-            j.DecimoPrimeiroNumero,
-            j.DecimoSegundoNumero,
-            j.DecimoTerceiroNumero,
-            j.DecimoQuartoNumero,
-            j.DecimoQuintoNumero
-                })
-                 .GroupBy(n => n)
-                 .Select(g => (
-                     Numero: g.Key,
-                     Quantidade: g.Count()
-                 ))
-                 .OrderByDescending(x => x.Quantidade)
-                 .ToList();
+            var retorno = numeros
+                .SelectMany(j => j.Numeros)
+                .GroupBy(n => n)
+                .Select(g => (
+                    Numero: g.Key,
+                    Quantidade: g.Count()
+                ))
+                .OrderByDescending(x => x.Quantidade)
+                .ToList();
 
             return retorno;
         }
 
         public async Task<List<ApostaModel>> ObterTodas()
         {
-            return _context.Apostas.Where(x => x.DataExclusao == null).ToList();
+            return await _context.Apostas
+                .Where(x => x.DataExclusao == null)
+                .ToListAsync();
         }
+
         public async Task<List<ApostaModel>> ObterTodasPorId(int usuarioId)
         {
-            return await _context.Apostas.Include(x => x.Jogos).Where(x => x.UsuarioId == usuarioId && x.DataExclusao == null).ToListAsync();
+            return await _context.Apostas
+                .Include(x => x.Jogos)
+                .Where(x => x.UsuarioId == usuarioId && x.DataExclusao == null)
+                .ToListAsync();
         }
     }
 }

@@ -1,32 +1,23 @@
-﻿using GeradorApostasLotofacil.Application;
+using GeradorApostasLotofacil.Application;
 using GeradorApostasLotofacil.Helper;
-using GeradorApostasLotofacil.Infrastructure;
-using GeradorApostasLotofacil.Repository;
 using GeradorApostasLotofacil.Session;
-using LoteriasCaixaRobot.Interface;
-using LoteriasCaixaRobot.Result;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
 
 namespace GeradorApostasLotofacil
 {
     public partial class FormImportarApostas : Form
     {
-        public readonly NavigationService _navigationService;
-        public readonly UsuarioSession _usuarioSession;
-        public readonly ApostaService _apostaService;
-        public FormImportarApostas(NavigationService navigationService, UsuarioSession usuarioSession)
+        private readonly IApostaService _apostaService;
+        private readonly IImportacaoService _importacaoService;
+        private readonly UsuarioSession _usuarioSession;
+
+        public FormImportarApostas(
+            IApostaService apostaService,
+            IImportacaoService importacaoService,
+            UsuarioSession usuarioSession)
         {
-            _navigationService = navigationService;
             InitializeComponent();
-            var context = new AppDbContext();
-            ApostaRepository apostaRepository = new ApostaRepository(context);
-            _apostaService = new ApostaService(apostaRepository);
+            _apostaService = apostaService;
+            _importacaoService = importacaoService;
             _usuarioSession = usuarioSession;
             CarregarDados();
             CarregaUltimasApostas();
@@ -34,61 +25,68 @@ namespace GeradorApostasLotofacil
 
         private async void btn_importarApostas_Click(object sender, EventArgs e)
         {
-           var retorno =  await _apostaService.ImportarApostas();
+            try
+            {
+                var retorno = await _importacaoService.ImportarApostas();
 
-            if (retorno)
-            {
-                MessageBox.Show("Processo finalizado com sucesso");
+                if (retorno)
+                {
+                    MessageBox.Show("Processo finalizado com sucesso", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Não foi possível importar as apostas. Verifique a conexão.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Erro interno");
+                MessageBox.Show($"Erro ao importar apostas: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
         private async void CarregarDados()
         {
-            var retornoRobo = await new LoteriasCaixaRobot.Interface.BuscaSorteioInterface().BuscaUltimoSorteio(LoteriasCaixaRobot.Request.BaseRequest.TipoSorteio.Lotofacil);
-
-            if (retornoRobo.ProcessOK)
+            try
             {
-                label_dadosApostas.Text = $"Ultimo sorteio realizado em: {retornoRobo.DataUltimoSorteio.ToString("dd/MM/yyyy")}\nO proximo sorteio será realizado em: {retornoRobo.DataProximoSorteio.ToString("dd/MM/yyyy")} ";
-            }
+                var retornoRobo = await new LoteriasCaixaRobot.Interface.BuscaSorteioInterface()
+                    .BuscaUltimoSorteio(LoteriasCaixaRobot.Request.BaseRequest.TipoSorteio.Lotofacil);
 
+                if (retornoRobo.ProcessOK)
+                {
+                    label_dadosApostas.Text = $"Ultimo sorteio realizado em: {retornoRobo.DataUltimoSorteio.ToString("dd/MM/yyyy")}\nO proximo sorteio será realizado em: {retornoRobo.DataProximoSorteio.ToString("dd/MM/yyyy")} ";
+                }
+            }
+            catch (Exception ex)
+            {
+                label_dadosApostas.Text = "Não foi possível carregar dados do sorteio.";
+                System.Diagnostics.Debug.WriteLine($"Erro ao carregar dados: {ex.Message}");
+            }
         }
+
         private async void CarregaUltimasApostas()
         {
-            var apostas = await _apostaService.ObterUltimas10();
-
-            if (apostas.Any())
+            try
             {
-                var apostasBuscadas = apostas.SelectMany(a => a.Jogos.Select(j => new ApostaGridViewModel
+                var apostas = await _apostaService.ObterUltimas10();
+
+                if (apostas.Any())
                 {
-                    Id = j.Id,
-                    PrimeiroNumero = j.PrimeiroNumero,
-                    SegundoNumero = j.SegundoNumero,
-                    TerceiroNumero = j.TerceiroNumero,
-                    QuartoNumero = j.QuartoNumero,
-                    QuintoNumero = j.QuintoNumero,
-                    SextoNumero = j.SextoNumero,
-                    SetimoNumero = j.SetimoNumero,
-                    OitavoNumero = j.OitavoNumero,
-                    NonoNumero = j.NonoNumero,
-                    DecimoNumero = j.DecimoNumero,
-                    DecimoPrimeiroNumero = j.DecimoPrimeiroNumero,
-                    DecimoSegundoNumero = j.DecimoSegundoNumero,
-                    DecimoTerceiroNumero = j.DecimoTerceiroNumero,
-                    DecimoQuartoNumero = j.DecimoQuartoNumero,
-                    DecimoQuintoNumero = j.DecimoQuintoNumero,
+                    var apostasBuscadas = apostas.SelectMany(a => a.Jogos.Select(j => new ApostaGridViewModel
+                    {
+                        Id = j.Id,
+                        Numeros = j.Numeros,
+                        Usuario = _usuarioSession.UsuarioLogado?.Username ?? "Sistema",
+                        DataInclusao = a.DataInclusao.ToString("dd/MM/yyyy")
+                    })).ToList();
 
-                    Usuario = _usuarioSession.UsuarioLogado.Username,
-
-                    DataInclusao = a.DataInclusao.ToString("dd/MM/yyyy")
-                })).ToList();
-
-                dgv_listaApostas.DataSource = apostasBuscadas;
-                dgv_listaApostas.AutoGenerateColumns = false;
+                    dgv_listaApostas.DataSource = apostasBuscadas;
+                    dgv_listaApostas.AutoGenerateColumns = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Erro ao carregar últimas apostas: {ex.Message}");
             }
         }
-
     }
 }

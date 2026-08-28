@@ -1,76 +1,81 @@
-﻿using GeradorApostasLotofacil.Application;
+using GeradorApostasLotofacil.Application;
 using GeradorApostasLotofacil.Domain;
-using GeradorApostasLotofacil.Infrastructure;
-using GeradorApostasLotofacil.Repository;
 using GeradorApostasLotofacil.Session;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
 
 namespace GeradorApostasLotofacil
 {
     public partial class FormGerarApostas : Form
     {
-        public readonly NavigationService _navigationService;
-        public readonly UsuarioSession _usuarioSession;
-        public readonly ApostaService _apostaService;
-        public List<JogoModel> _jogosSalvos;
-        public FormGerarApostas(NavigationService navigationService, UsuarioSession usuarioSession)
+        private readonly IGeracaoService _geracaoService;
+        private readonly IApostaService _apostaService;
+        private readonly UsuarioSession _usuarioSession;
+        private List<JogoModel>? _jogosSalvos;
+
+        public FormGerarApostas(
+            IGeracaoService geracaoService,
+            IApostaService apostaService,
+            UsuarioSession usuarioSession)
         {
-
-
-            _navigationService = navigationService;
             InitializeComponent();
-            var context = new AppDbContext();
-            ApostaRepository apostaRepository = new ApostaRepository(context);
-            _apostaService = new ApostaService(apostaRepository);
+            _geracaoService = geracaoService;
+            _apostaService = apostaService;
             _usuarioSession = usuarioSession;
-
         }
 
-        private async void btn_gerarApostas_Click(object sender, EventArgs e)
+        private void btn_gerarApostas_Click(object sender, EventArgs e)
         {
             try
             {
-                var apostas = _apostaService.GerarJogosInteligentes(numberBox_quantidadeApostas.Value);
+                var apostas = _geracaoService.GerarJogosInteligentes(numberBox_quantidadeApostas.Value);
 
                 if (apostas.Jogos.Any())
                 {
                     _jogosSalvos = apostas.Jogos;
                     dgv_listaApostas.AutoGenerateColumns = false;
-                    dgv_listaApostas.DataSource = apostas.Jogos;
+
+                    // Create a display-friendly list for the DataGridView
+                    var displayList = apostas.Jogos.Select(j => new Helper.ApostaGridViewModel
+                    {
+                        Numeros = j.Numeros
+                    }).ToList();
+
+                    dgv_listaApostas.DataSource = displayList;
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("falha na aplicacao", ex.Message);
-
-                throw;
+                MessageBox.Show($"Erro ao gerar apostas: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
         }
 
         private async void btnGravarApostas_Click(object sender, EventArgs e)
         {
             try
             {
-                var retornoRobo = await new LoteriasCaixaRobot.Interface.BuscaSorteioInterface().BuscaUltimoSorteio(LoteriasCaixaRobot.Request.BaseRequest.TipoSorteio.Lotofacil);
+                if (_jogosSalvos == null || !_jogosSalvos.Any())
+                {
+                    MessageBox.Show("Nenhuma aposta gerada para gravar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
 
-                var aposta = new ApostaModel() { Jogos = _jogosSalvos, DataInclusao = DateTime.Now, DataApuracao = retornoRobo.DataProximoSorteio, UsuarioId = _usuarioSession.UsuarioLogado.Id };
+                var retornoRobo = await new LoteriasCaixaRobot.Interface.BuscaSorteioInterface()
+                    .BuscaUltimoSorteio(LoteriasCaixaRobot.Request.BaseRequest.TipoSorteio.Lotofacil);
+
+                var aposta = new ApostaModel()
+                {
+                    Jogos = _jogosSalvos,
+                    DataInclusao = DateTime.Now,
+                    DataApuracao = retornoRobo.DataProximoSorteio,
+                    UsuarioId = _usuarioSession.UsuarioLogado.Id
+                };
+
                 await _apostaService.GravarApostas(aposta);
-                MessageBox.Show("Apostas gravadas com sucesso!");
+                MessageBox.Show("Apostas gravadas com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("falha na aplicacao", ex.Message);
-
-                throw;
+                MessageBox.Show($"Erro ao gravar apostas: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
         }
     }
 }

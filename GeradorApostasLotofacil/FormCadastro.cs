@@ -1,41 +1,47 @@
-﻿using GeradorApostasLotofacil.Application;
-using GeradorApostasLotofacil.Infrastructure;
-using GeradorApostasLotofacil.Repository;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
+using GeradorApostasLotofacil.Application;
+using GeradorApostasLotofacil.Session;
 
 namespace GeradorApostasLotofacil
 {
     public partial class FormCadastro : Form
     {
-        private readonly NavigationService _navigationService;
-        private UsuarioService _usuarioService;
-        public FormCadastro(NavigationService navigation)
+        private readonly IUsuarioService _usuarioService;
+        private readonly IServiceProvider _serviceProvider;
+
+        public FormCadastro(
+            IUsuarioService usuarioService,
+            IServiceProvider serviceProvider)
         {
             InitializeComponent();
-            _navigationService = navigation;
-            var context = new AppDbContext();
-            UsuarioRepositoryInterface usuarioRepository = new UsuarioRepository(context);
-            _usuarioService = new UsuarioService(usuarioRepository);
+            _usuarioService = usuarioService;
+            _serviceProvider = serviceProvider;
         }
 
-        private void btn_Cadastrar_Click(object sender, EventArgs e)
+        private async void btn_Cadastrar_Click(object sender, EventArgs e)
         {
-            var usuario = txtbox_usuario.Text;
-            var senha = maskedtxtbox_senha.Text;
-            var email = txtbox_Email.Text;
-            var perfil = cmbBox_Perfil.SelectedItem.ToString();
+            try
+            {
+                var usuario = txtbox_usuario.Text;
+                var senha = maskedtxtbox_senha.Text;
+                var email = txtbox_Email.Text;
+                var perfil = cmbBox_Perfil.SelectedItem?.ToString() ?? "User";
 
-            _usuarioService.CadastrarUsuario(usuario, senha, email, perfil);
-            MessageBox.Show("Usuario cadastrado com sucesso!");
-            _navigationService.NavegarPara(new FormLogin(_navigationService, new Session.UsuarioSession()));
+                await _usuarioService.CadastrarUsuario(usuario, senha, email, perfil);
+                MessageBox.Show("Usuário cadastrado com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-            //Envia para Application
+                // Navigate to login
+                if (this.Parent is Panel panel)
+                {
+                    var nav = new NavigationService(panel, _serviceProvider);
+                    var formLogin = _serviceProvider.GetService(typeof(FormLogin)) as Form;
+                    if (formLogin != null)
+                        nav.NavegarPara(formLogin);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao cadastrar usuário: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

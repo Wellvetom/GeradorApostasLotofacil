@@ -1,16 +1,9 @@
-﻿namespace GeradorApostasLotofacil
+namespace GeradorApostasLotofacil
 {
     partial class FormCadastro
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -22,146 +15,163 @@
 
         #region Windows Form Designer generated code
 
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
-            txtbox_Email = new MaskedTextBox();
-            label2 = new Label();
-            txtbox_usuario = new TextBox();
+            panelCard = new Panel();
+            label4 = new Label();
             label1 = new Label();
-            btn_Cadastrar = new Button();
-            maskedtxtbox_senha = new MaskedTextBox();
+            txtbox_usuario = new TextBox();
             label3 = new Label();
+            maskedtxtbox_senha = new MaskedTextBox();
+            label2 = new Label();
+            txtbox_Email = new MaskedTextBox();
             lblPerfil = new Label();
             cmbBox_Perfil = new ComboBox();
-            label4 = new Label();
+            btn_Cadastrar = new Button();
+            panelCard.SuspendLayout();
             SuspendLayout();
             // 
-            // txtbox_Email
+            // panelCard
             // 
-            txtbox_Email.Location = new Point(561, 94);
-            txtbox_Email.Name = "txtbox_Email";
-            txtbox_Email.Size = new Size(130, 27);
-            txtbox_Email.TabIndex = 13;
+            panelCard.BackColor = Color.FromArgb(37, 38, 54);
+            panelCard.Controls.Add(label4);
+            panelCard.Controls.Add(label1);
+            panelCard.Controls.Add(txtbox_usuario);
+            panelCard.Controls.Add(label3);
+            panelCard.Controls.Add(maskedtxtbox_senha);
+            panelCard.Controls.Add(label2);
+            panelCard.Controls.Add(txtbox_Email);
+            panelCard.Controls.Add(lblPerfil);
+            panelCard.Controls.Add(cmbBox_Perfil);
+            panelCard.Controls.Add(btn_Cadastrar);
+            panelCard.Location = new Point(200, 60);
+            panelCard.Name = "panelCard";
+            panelCard.Padding = new Padding(30);
+            panelCard.Size = new Size(500, 380);
+            panelCard.Anchor = AnchorStyles.None;
             // 
-            // label2
+            // label4
             // 
-            label2.AutoSize = true;
-            label2.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label2.ForeColor = Color.White;
-            label2.Location = new Point(486, 90);
-            label2.Name = "label2";
-            label2.Size = new Size(69, 28);
-            label2.TabIndex = 12;
-            label2.Text = "Email:";
-            // 
-            // txtbox_usuario
-            // 
-            txtbox_usuario.Location = new Point(112, 91);
-            txtbox_usuario.Name = "txtbox_usuario";
-            txtbox_usuario.Size = new Size(130, 27);
-            txtbox_usuario.TabIndex = 11;
+            label4.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
+            label4.ForeColor = Color.White;
+            label4.Location = new Point(30, 20);
+            label4.Name = "label4";
+            label4.Size = new Size(440, 40);
+            label4.Text = "📝 Cadastrar Usuário";
+            label4.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label1.ForeColor = Color.White;
-            label1.Location = new Point(17, 87);
+            label1.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            label1.ForeColor = Color.FromArgb(180, 180, 200);
+            label1.Location = new Point(35, 80);
             label1.Name = "label1";
-            label1.Size = new Size(89, 28);
-            label1.TabIndex = 10;
-            label1.Text = "Usuario:";
+            label1.Text = "Usuário";
             // 
-            // btn_Cadastrar
+            // txtbox_usuario
             // 
-            btn_Cadastrar.BackColor = Color.RoyalBlue;
-            btn_Cadastrar.FlatStyle = FlatStyle.Flat;
-            btn_Cadastrar.Location = new Point(804, 149);
-            btn_Cadastrar.Name = "btn_Cadastrar";
-            btn_Cadastrar.Size = new Size(125, 43);
-            btn_Cadastrar.TabIndex = 9;
-            btn_Cadastrar.Text = "Cadastrar";
-            btn_Cadastrar.UseVisualStyleBackColor = false;
-            btn_Cadastrar.Click += btn_Cadastrar_Click;
-            // 
-            // maskedtxtbox_senha
-            // 
-            maskedtxtbox_senha.Location = new Point(337, 91);
-            maskedtxtbox_senha.Name = "maskedtxtbox_senha";
-            maskedtxtbox_senha.PasswordChar = '*';
-            maskedtxtbox_senha.Size = new Size(130, 27);
-            maskedtxtbox_senha.TabIndex = 15;
+            txtbox_usuario.BackColor = Color.FromArgb(55, 65, 82);
+            txtbox_usuario.BorderStyle = BorderStyle.FixedSingle;
+            txtbox_usuario.Font = new Font("Segoe UI", 11F);
+            txtbox_usuario.ForeColor = Color.White;
+            txtbox_usuario.Location = new Point(35, 105);
+            txtbox_usuario.Name = "txtbox_usuario";
+            txtbox_usuario.Size = new Size(430, 32);
+            txtbox_usuario.PlaceholderText = "Digite seu nome de usuário";
             // 
             // label3
             // 
             label3.AutoSize = true;
-            label3.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label3.ForeColor = Color.White;
-            label3.Location = new Point(257, 87);
+            label3.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            label3.ForeColor = Color.FromArgb(180, 180, 200);
+            label3.Location = new Point(35, 150);
             label3.Name = "label3";
-            label3.Size = new Size(74, 28);
-            label3.TabIndex = 14;
-            label3.Text = "Senha:";
+            label3.Text = "Senha";
+            // 
+            // maskedtxtbox_senha
+            // 
+            maskedtxtbox_senha.BackColor = Color.FromArgb(55, 65, 82);
+            maskedtxtbox_senha.BorderStyle = BorderStyle.FixedSingle;
+            maskedtxtbox_senha.Font = new Font("Segoe UI", 11F);
+            maskedtxtbox_senha.ForeColor = Color.White;
+            maskedtxtbox_senha.Location = new Point(35, 175);
+            maskedtxtbox_senha.Name = "maskedtxtbox_senha";
+            maskedtxtbox_senha.PasswordChar = '●';
+            maskedtxtbox_senha.Size = new Size(430, 32);
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            label2.ForeColor = Color.FromArgb(180, 180, 200);
+            label2.Location = new Point(35, 220);
+            label2.Name = "label2";
+            label2.Text = "E-mail";
+            // 
+            // txtbox_Email
+            // 
+            txtbox_Email.BackColor = Color.FromArgb(55, 65, 82);
+            txtbox_Email.BorderStyle = BorderStyle.FixedSingle;
+            txtbox_Email.Font = new Font("Segoe UI", 11F);
+            txtbox_Email.ForeColor = Color.White;
+            txtbox_Email.Location = new Point(35, 245);
+            txtbox_Email.Name = "txtbox_Email";
+            txtbox_Email.Size = new Size(430, 32);
             // 
             // lblPerfil
             // 
             lblPerfil.AutoSize = true;
-            lblPerfil.Font = new Font("Segoe UI", 12F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            lblPerfil.ForeColor = Color.White;
-            lblPerfil.Location = new Point(710, 94);
+            lblPerfil.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblPerfil.ForeColor = Color.FromArgb(180, 180, 200);
+            lblPerfil.Location = new Point(35, 290);
             lblPerfil.Name = "lblPerfil";
-            lblPerfil.Size = new Size(67, 28);
-            lblPerfil.TabIndex = 16;
-            lblPerfil.Text = "Perfil:";
+            lblPerfil.Text = "Perfil";
             // 
             // cmbBox_Perfil
             // 
+            cmbBox_Perfil.BackColor = Color.FromArgb(55, 65, 82);
+            cmbBox_Perfil.ForeColor = Color.White;
+            cmbBox_Perfil.FlatStyle = FlatStyle.Flat;
+            cmbBox_Perfil.Font = new Font("Segoe UI", 11F);
             cmbBox_Perfil.FormattingEnabled = true;
-            cmbBox_Perfil.Items.AddRange(new object[] { "Usuario", "Administrador" });
-            cmbBox_Perfil.Location = new Point(794, 96);
+            cmbBox_Perfil.Items.AddRange(new object[] { "Usuario", "Administrador", "Admin" });
+            cmbBox_Perfil.Location = new Point(35, 315);
             cmbBox_Perfil.Name = "cmbBox_Perfil";
-            cmbBox_Perfil.Size = new Size(151, 28);
-            cmbBox_Perfil.TabIndex = 17;
+            cmbBox_Perfil.Size = new Size(210, 33);
+            cmbBox_Perfil.DropDownStyle = ComboBoxStyle.DropDownList;
             // 
-            // label4
+            // btn_Cadastrar
             // 
-            label4.AutoSize = true;
-            label4.Font = new Font("Segoe UI", 13.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            label4.ForeColor = Color.White;
-            label4.Location = new Point(17, 24);
-            label4.Name = "label4";
-            label4.Size = new Size(204, 31);
-            label4.TabIndex = 18;
-            label4.Text = "Cadastrar Usuario";
+            btn_Cadastrar.BackColor = Color.FromArgb(63, 81, 181);
+            btn_Cadastrar.FlatAppearance.BorderSize = 0;
+            btn_Cadastrar.FlatStyle = FlatStyle.Flat;
+            btn_Cadastrar.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
+            btn_Cadastrar.ForeColor = Color.White;
+            btn_Cadastrar.Location = new Point(265, 310);
+            btn_Cadastrar.Name = "btn_Cadastrar";
+            btn_Cadastrar.Size = new Size(200, 40);
+            btn_Cadastrar.Text = "✅ Cadastrar";
+            btn_Cadastrar.Cursor = Cursors.Hand;
+            btn_Cadastrar.Click += btn_Cadastrar_Click;
             // 
             // FormCadastro
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.DarkSlateBlue;
+            BackColor = Color.FromArgb(30, 30, 46);
             ClientSize = new Size(988, 450);
-            Controls.Add(label4);
-            Controls.Add(cmbBox_Perfil);
-            Controls.Add(lblPerfil);
-            Controls.Add(maskedtxtbox_senha);
-            Controls.Add(label3);
-            Controls.Add(txtbox_Email);
-            Controls.Add(label2);
-            Controls.Add(txtbox_usuario);
-            Controls.Add(label1);
-            Controls.Add(btn_Cadastrar);
+            Controls.Add(panelCard);
             Name = "FormCadastro";
             Text = "FormCadastro";
+            panelCard.ResumeLayout(false);
+            panelCard.PerformLayout();
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion
 
+        private Panel panelCard;
         private MaskedTextBox txtbox_Email;
         private Label label2;
         private TextBox txtbox_usuario;

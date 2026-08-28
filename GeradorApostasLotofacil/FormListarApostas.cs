@@ -1,33 +1,22 @@
-﻿using GeradorApostasLotofacil.Application;
+using GeradorApostasLotofacil.Application;
 using GeradorApostasLotofacil.Helper;
-using GeradorApostasLotofacil.Infrastructure;
-using GeradorApostasLotofacil.Repository;
 using GeradorApostasLotofacil.Session;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Net.Mime;
 using System.Text;
-using System.Windows.Forms;
 
 namespace GeradorApostasLotofacil
 {
     public partial class FormListarApostas : Form
     {
-        public readonly NavigationService _navigationService;
-        public readonly UsuarioSession _usuarioSession;
-        public readonly ApostaService _apostaService;
-        private List<ApostaGridViewModel> apostasBuscadas;
-        public FormListarApostas(NavigationService navigationService, UsuarioSession usuarioSession)
+        private readonly IConferenciaService _conferenciaService;
+        private readonly UsuarioSession _usuarioSession;
+        private List<ApostaGridViewModel>? apostasBuscadas;
+
+        public FormListarApostas(
+            IConferenciaService conferenciaService,
+            UsuarioSession usuarioSession)
         {
-            _navigationService = navigationService;
             InitializeComponent();
-            var context = new AppDbContext();
-            ApostaRepository apostaRepository = new ApostaRepository(context);
-            _apostaService = new ApostaService(apostaRepository);
+            _conferenciaService = conferenciaService;
             _usuarioSession = usuarioSession;
             btn_exportarApostas.Visible = false;
         }
@@ -36,30 +25,16 @@ namespace GeradorApostasLotofacil
         {
             try
             {
-                var apostas = await _apostaService.ObterApostasComResultado(_usuarioSession.UsuarioLogado.Id);
+                var apostas = await _conferenciaService.ObterApostasComResultado(_usuarioSession.UsuarioLogado.Id);
 
                 if (apostas.Any())
                 {
                     apostasBuscadas = apostas.SelectMany(a => a.Jogos.Select(j => new ApostaGridViewModel
                     {
                         Id = j.Id,
-                        PrimeiroNumero = j.Numeros.PrimeiroNumero,
-                        SegundoNumero = j.Numeros.SegundoNumero,
-                        TerceiroNumero = j.Numeros.TerceiroNumero,
-                        QuartoNumero = j.Numeros.QuartoNumero,
-                        QuintoNumero = j.Numeros.QuintoNumero,
-                        SextoNumero = j.Numeros.SextoNumero,
-                        SetimoNumero = j.Numeros.SetimoNumero,
-                        OitavoNumero = j.Numeros.OitavoNumero,
-                        NonoNumero = j.Numeros.NonoNumero,
-                        DecimoNumero = j.Numeros.DecimoNumero,
-                        DecimoPrimeiroNumero = j.Numeros.DecimoPrimeiroNumero,
-                        DecimoSegundoNumero = j.Numeros.DecimoSegundoNumero,
-                        DecimoTerceiroNumero = j.Numeros.DecimoTerceiroNumero,
-                        DecimoQuartoNumero = j.Numeros.DecimoQuartoNumero,
-                        DecimoQuintoNumero = j.Numeros.DecimoQuintoNumero,
-                        Usuario = _usuarioSession.UsuarioLogado.Username,
+                        Numeros = j.Numeros.NumerosList,
                         Acertos = j.Numeros.QuantidadeAcertos,
+                        Usuario = _usuarioSession.UsuarioLogado.Username,
                         DataInclusao = a.DataInclusao.ToString("dd/MM/yyyy")
                     })).ToList();
 
@@ -70,55 +45,62 @@ namespace GeradorApostasLotofacil
             }
             catch (Exception ex)
             {
-                MessageBox.Show("falha na aplicacao", ex.Message);
-
-                throw;
+                MessageBox.Show($"Erro ao listar apostas: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
-
         }
 
         private void btn_exportarApostas_Click(object sender, EventArgs e)
         {
-            using (SaveFileDialog sfd = new SaveFileDialog())
+            try
             {
-                sfd.Filter = "Arquivo CSV (*.csv)|*.csv";
-                sfd.FileName = "apostas.csv";
-
-                if (sfd.ShowDialog() == DialogResult.OK)
+                if (apostasBuscadas == null || !apostasBuscadas.Any())
                 {
-                    var sb = new StringBuilder();
-
-                    // Cabeçalho
-                    sb.AppendLine("Id,PrimeiroNumero,SegundoNumero,TerceiroNumero,QuartoNumero,QuintoNumero,SextoNumero,SetimoNumero,OitavoNumero,NonoNumero,DecimoNumero,DecimoPrimeiroNumero,DecimoSegundoNumero,DecimoTerceiroNumero,DecimoQuartoNumero,DecimoQuintoNumero,Usuario,Data");
-
-                    foreach (var item in apostasBuscadas)
-                    {
-                        sb.AppendLine($"{item.Id}," +
-                                      $"{item.PrimeiroNumero}," +
-                                      $"{item.SegundoNumero}," +
-                                      $"{item.TerceiroNumero}," +
-                                      $"{item.QuartoNumero}," +
-                                      $"{item.QuintoNumero}," +
-                                      $"{item.SextoNumero}," +
-                                      $"{item.SetimoNumero}," +
-                                      $"{item.OitavoNumero}," +
-                                      $"{item.NonoNumero}," +
-                                      $"{item.DecimoNumero}," +
-                                      $"{item.DecimoPrimeiroNumero}," +
-                                      $"{item.DecimoSegundoNumero}," +
-                                      $"{item.DecimoTerceiroNumero}," +
-                                      $"{item.DecimoQuartoNumero}," +
-                                      $"{item.DecimoQuintoNumero}," +
-                                      $"{item.Usuario}," +
-                                      $"{item.DataInclusao:dd/MM/yyyy HH:mm}");
-                    }
-
-                    File.WriteAllText(sfd.FileName, sb.ToString(), Encoding.UTF8);
-
-                    MessageBox.Show("CSV exportado com sucesso!");
+                    MessageBox.Show("Nenhuma aposta para exportar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
                 }
-               
+
+                using (SaveFileDialog sfd = new SaveFileDialog())
+                {
+                    sfd.Filter = "Arquivo CSV (*.csv)|*.csv";
+                    sfd.FileName = "apostas.csv";
+
+                    if (sfd.ShowDialog() == DialogResult.OK)
+                    {
+                        var sb = new StringBuilder();
+
+                        // Cabeçalho
+                        sb.AppendLine("Id,PrimeiroNumero,SegundoNumero,TerceiroNumero,QuartoNumero,QuintoNumero,SextoNumero,SetimoNumero,OitavoNumero,NonoNumero,DecimoNumero,DecimoPrimeiroNumero,DecimoSegundoNumero,DecimoTerceiroNumero,DecimoQuartoNumero,DecimoQuintoNumero,Usuario,Data");
+
+                        foreach (var item in apostasBuscadas)
+                        {
+                            sb.AppendLine($"{item.Id}," +
+                                          $"{item.PrimeiroNumero}," +
+                                          $"{item.SegundoNumero}," +
+                                          $"{item.TerceiroNumero}," +
+                                          $"{item.QuartoNumero}," +
+                                          $"{item.QuintoNumero}," +
+                                          $"{item.SextoNumero}," +
+                                          $"{item.SetimoNumero}," +
+                                          $"{item.OitavoNumero}," +
+                                          $"{item.NonoNumero}," +
+                                          $"{item.DecimoNumero}," +
+                                          $"{item.DecimoPrimeiroNumero}," +
+                                          $"{item.DecimoSegundoNumero}," +
+                                          $"{item.DecimoTerceiroNumero}," +
+                                          $"{item.DecimoQuartoNumero}," +
+                                          $"{item.DecimoQuintoNumero}," +
+                                          $"{item.Usuario}," +
+                                          $"{item.DataInclusao}");
+                        }
+
+                        File.WriteAllText(sfd.FileName, sb.ToString(), Encoding.UTF8);
+                        MessageBox.Show("CSV exportado com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao exportar CSV: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

@@ -1,35 +1,41 @@
-﻿using GeradorApostasLotofacil.Application;
+using GeradorApostasLotofacil.Application;
 using GeradorApostasLotofacil.Domain;
-using GeradorApostasLotofacil.Infrastructure;
-using GeradorApostasLotofacil.Repository;
 using GeradorApostasLotofacil.Session;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
 
 namespace GeradorApostasLotofacil
 {
     public partial class FormLogin : Form
     {
-        public readonly NavigationService _navigationService;
-        public event Action OnIrParaCadastro;
+        private readonly NavigationService _navigationService;
         private readonly UsuarioSession _session;
-        public event Action<UsuarioModel> OnLoginEfetuado;
-        private UsuarioService _usuarioService;
-        public FormLogin(NavigationService navigation, UsuarioSession usuarioSession)
+        private readonly IUsuarioService _usuarioService;
+        private readonly IServiceProvider _serviceProvider;
+
+        public event Action<UsuarioModel>? OnLoginEfetuado;
+
+        public FormLogin(
+            IUsuarioService usuarioService,
+            UsuarioSession usuarioSession,
+            IServiceProvider serviceProvider)
         {
             InitializeComponent();
-            _navigationService = navigation;
+            _usuarioService = usuarioService;
             _session = usuarioSession;
-            // 🔥 injeção em cadeia
-            var context = new AppDbContext();
-            UsuarioRepositoryInterface usuarioRepository = new UsuarioRepository(context);
-            _usuarioService = new UsuarioService(usuarioRepository);
+            _serviceProvider = serviceProvider;
+            _navigationService = new NavigationService(this.Parent as Panel ?? new Panel(), serviceProvider);
+        }
 
+        internal void SetNavigationService(NavigationService navigationService)
+        {
+            // Will be set when navigated via NavigationService
+        }
+
+        private NavigationService GetNavigationService()
+        {
+            // Find parent panel and create navigation service
+            if (this.Parent is Panel panel)
+                return new NavigationService(panel, _serviceProvider);
+            return _navigationService;
         }
 
         private async void btn_Login_Click(object sender, EventArgs e)
@@ -39,28 +45,32 @@ namespace GeradorApostasLotofacil
                 var login = await _usuarioService.VerificaLogin(txtbox_usuario.Text, txtbox_senha.Text);
 
                 if (login == null)
-                    MessageBox.Show("Login incorreto");
+                {
+                    MessageBox.Show("Login incorreto", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
                 else
                 {
                     _session.Login(login);
-                    // 🔥 avisa o form principal
                     OnLoginEfetuado?.Invoke(login);
 
-                    _navigationService.NavegarPara(new FormGerarApostas(_navigationService, _session));
+                    var nav = GetNavigationService();
+                    var formGerar = _serviceProvider.GetService(typeof(FormGerarApostas)) as Form;
+                    if (formGerar != null)
+                        nav.NavegarPara(formGerar);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("falha na aplicacao", ex.Message);
-                throw;
+                MessageBox.Show($"Erro ao realizar login: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-          
         }
 
         private void linkLbl_nao_possui_cadastro_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            _navigationService.NavegarPara(new FormCadastro(_navigationService));
-
+            var nav = GetNavigationService();
+            var formCadastro = _serviceProvider.GetService(typeof(FormCadastro)) as Form;
+            if (formCadastro != null)
+                nav.NavegarPara(formCadastro);
         }
     }
 }

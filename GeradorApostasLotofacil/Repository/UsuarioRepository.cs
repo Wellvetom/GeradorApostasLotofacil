@@ -1,13 +1,10 @@
-﻿using GeradorApostasLotofacil.Domain;
+using GeradorApostasLotofacil.Domain;
 using GeradorApostasLotofacil.Infrastructure;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace GeradorApostasLotofacil.Repository
 {
-    public class UsuarioRepository : UsuarioRepositoryInterface
+    public class UsuarioRepository : IUsuarioRepository
     {
         private readonly AppDbContext _context;
 
@@ -15,15 +12,22 @@ namespace GeradorApostasLotofacil.Repository
         {
             _context = context;
         }
+
         public async Task Add(UsuarioModel model)
         {
             _context.Add(model);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public  Task<UsuarioModel> GetByUsername(string username)
+        public async Task<UsuarioModel?> GetByUsername(string username)
         {
-            return _context.Usuarios.FirstOrDefaultAsync(x => x.Username == username);
+            return await _context.Usuarios.FirstOrDefaultAsync(x => x.Username == username);
+        }
+
+        public async Task Update(UsuarioModel model)
+        {
+            _context.Usuarios.Update(model);
+            await _context.SaveChangesAsync();
         }
     }
 }
