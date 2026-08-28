@@ -10,5 +10,6 @@ namespace GeradorApostasLotofacil.Repository
         Task<ApostaModel?> ObterUltima();
         Task<List<ApostaModel>> ObterTodasPorId(int usuarioId);
         List<(int Numero, int Quantidade)> ObterRankingNumeros();
+        Task ExcluirAposta(int jogoId);
     }
 }

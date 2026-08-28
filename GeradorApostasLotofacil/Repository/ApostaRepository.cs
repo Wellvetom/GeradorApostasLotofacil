@@ -67,5 +67,18 @@ namespace GeradorApostasLotofacil.Repository
                 .Where(x => x.UsuarioId == usuarioId && x.DataExclusao == null)
                 .ToListAsync();
         }
+
+        public async Task ExcluirAposta(int jogoId)
+        {
+            var jogo = await _context.Jogos
+                .Include(j => j.Aposta)
+                .FirstOrDefaultAsync(j => j.Id == jogoId);
+
+            if (jogo?.Aposta != null)
+            {
+                jogo.Aposta.DataExclusao = DateTime.Now;
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

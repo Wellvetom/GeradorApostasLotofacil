@@ -26,5 +26,10 @@ namespace GeradorApostasLotofacil.Application
         {
             return await _repo.ObterUltimas10();
         }
+
+        public async Task ExcluirAposta(int jogoId)
+        {
+            await _repo.ExcluirAposta(jogoId);
+        }
     }
 }

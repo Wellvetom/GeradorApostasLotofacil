@@ -42,6 +42,13 @@ namespace GeradorApostasLotofacil
             colAcertos = new DataGridViewTextBoxColumn();
             colData = new DataGridViewTextBoxColumn();
             colResortear = new DataGridViewButtonColumn();
+            colDuplicar = new DataGridViewButtonColumn();
+            colExcluir = new DataGridViewButtonColumn();
+            btn_exportarPdf = new Button();
+            lblPeriodo = new Label();
+            dtpDe = new DateTimePicker();
+            lblAte = new Label();
+            dtpAte = new DateTimePicker();
             panelTop.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgv_listaApostas).BeginInit();
             SuspendLayout();
@@ -52,11 +59,16 @@ namespace GeradorApostasLotofacil
             panelTop.Controls.Add(lblTitulo);
             panelTop.Controls.Add(btnListasApostas);
             panelTop.Controls.Add(btn_exportarApostas);
+            panelTop.Controls.Add(btn_exportarPdf);
+            panelTop.Controls.Add(lblPeriodo);
+            panelTop.Controls.Add(dtpDe);
+            panelTop.Controls.Add(lblAte);
+            panelTop.Controls.Add(dtpAte);
             panelTop.Dock = DockStyle.Top;
             panelTop.Location = new Point(0, 0);
             panelTop.Name = "panelTop";
             panelTop.Padding = new Padding(15);
-            panelTop.Size = new Size(948, 70);
+            panelTop.Size = new Size(948, 115);
             // 
             // lblTitulo
             // 
@@ -75,9 +87,9 @@ namespace GeradorApostasLotofacil
             btnListasApostas.FlatStyle = FlatStyle.Flat;
             btnListasApostas.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnListasApostas.ForeColor = Color.White;
-            btnListasApostas.Location = new Point(620, 15);
+            btnListasApostas.Location = new Point(480, 15);
             btnListasApostas.Name = "btnListasApostas";
-            btnListasApostas.Size = new Size(150, 38);
+            btnListasApostas.Size = new Size(140, 38);
             btnListasApostas.Text = "🔄 Carregar";
             btnListasApostas.Cursor = Cursors.Hand;
             btnListasApostas.Click += btnListasApostas_Click;
@@ -90,12 +102,65 @@ namespace GeradorApostasLotofacil
             btn_exportarApostas.FlatStyle = FlatStyle.Flat;
             btn_exportarApostas.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btn_exportarApostas.ForeColor = Color.White;
-            btn_exportarApostas.Location = new Point(785, 15);
+            btn_exportarApostas.Location = new Point(635, 15);
             btn_exportarApostas.Name = "btn_exportarApostas";
             btn_exportarApostas.Size = new Size(145, 38);
             btn_exportarApostas.Text = "📥 Exportar CSV";
             btn_exportarApostas.Cursor = Cursors.Hand;
             btn_exportarApostas.Click += btn_exportarApostas_Click;
+            // 
+            // btn_exportarPdf
+            // 
+            btn_exportarPdf.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btn_exportarPdf.BackColor = Color.FromArgb(183, 28, 28);
+            btn_exportarPdf.FlatAppearance.BorderSize = 0;
+            btn_exportarPdf.FlatStyle = FlatStyle.Flat;
+            btn_exportarPdf.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btn_exportarPdf.ForeColor = Color.White;
+            btn_exportarPdf.Location = new Point(795, 15);
+            btn_exportarPdf.Name = "btn_exportarPdf";
+            btn_exportarPdf.Size = new Size(138, 38);
+            btn_exportarPdf.Text = "📄 Exportar PDF";
+            btn_exportarPdf.Cursor = Cursors.Hand;
+            btn_exportarPdf.Click += btn_exportarPdf_Click;
+            // 
+            // lblPeriodo
+            // 
+            lblPeriodo.AutoSize = true;
+            lblPeriodo.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblPeriodo.ForeColor = Color.White;
+            lblPeriodo.Location = new Point(18, 78);
+            lblPeriodo.Name = "lblPeriodo";
+            lblPeriodo.Text = "Período:";
+            // 
+            // dtpDe
+            // 
+            dtpDe.Format = DateTimePickerFormat.Short;
+            dtpDe.Location = new Point(100, 74);
+            dtpDe.Name = "dtpDe";
+            dtpDe.Size = new Size(130, 27);
+            dtpDe.Value = DateTime.Now.AddDays(-30);
+            dtpDe.CalendarMonthBackground = Color.FromArgb(55, 65, 82);
+            dtpDe.CalendarForeColor = Color.White;
+            // 
+            // lblAte
+            // 
+            lblAte.AutoSize = true;
+            lblAte.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblAte.ForeColor = Color.White;
+            lblAte.Location = new Point(240, 78);
+            lblAte.Name = "lblAte";
+            lblAte.Text = "até";
+            // 
+            // dtpAte
+            // 
+            dtpAte.Format = DateTimePickerFormat.Short;
+            dtpAte.Location = new Point(275, 74);
+            dtpAte.Name = "dtpAte";
+            dtpAte.Size = new Size(130, 27);
+            dtpAte.Value = DateTime.Now;
+            dtpAte.CalendarMonthBackground = Color.FromArgb(55, 65, 82);
+            dtpAte.CalendarForeColor = Color.White;
             // 
             // dgv_listaApostas
             // 
@@ -116,7 +181,7 @@ namespace GeradorApostasLotofacil
             dgv_listaApostas.ColumnHeadersDefaultCellStyle = headerStyle;
             dgv_listaApostas.ColumnHeadersHeight = 36;
             dgv_listaApostas.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
-            dgv_listaApostas.Columns.AddRange(new DataGridViewColumn[] { colData, PrimeiroNumero, SegundoNumero, TerceiroNumero, QuartoNumero, QuintoNumero, SextoNumero, SetimoNumero, OitavoNumero, NonoNumero, DecimoNumero, DecimoPrimeiroNumero, DecimoSegundoNumero, DecimoTerceiroNumero, DecimoQuartoNumero, DecimoQuintoNumero, colAcertos, colResortear });
+            dgv_listaApostas.Columns.AddRange(new DataGridViewColumn[] { colData, PrimeiroNumero, SegundoNumero, TerceiroNumero, QuartoNumero, QuintoNumero, SextoNumero, SetimoNumero, OitavoNumero, NonoNumero, DecimoNumero, DecimoPrimeiroNumero, DecimoSegundoNumero, DecimoTerceiroNumero, DecimoQuartoNumero, DecimoQuintoNumero, colAcertos, colResortear, colDuplicar, colExcluir });
             cellStyle.BackColor = Color.FromArgb(40, 42, 58);
             cellStyle.ForeColor = Color.White;
             cellStyle.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
@@ -128,7 +193,7 @@ namespace GeradorApostasLotofacil
             dgv_listaApostas.Dock = DockStyle.Fill;
             dgv_listaApostas.EnableHeadersVisualStyles = false;
             dgv_listaApostas.GridColor = Color.FromArgb(55, 58, 78);
-            dgv_listaApostas.Location = new Point(0, 70);
+            dgv_listaApostas.Location = new Point(0, 115);
             dgv_listaApostas.Name = "dgv_listaApostas";
             dgv_listaApostas.ReadOnly = true;
             dgv_listaApostas.RowHeadersVisible = false;
@@ -275,6 +340,42 @@ namespace GeradorApostasLotofacil
                 Alignment = DataGridViewContentAlignment.MiddleCenter
             };
             // 
+            // colDuplicar
+            // 
+            colDuplicar.HeaderText = "";
+            colDuplicar.Name = "colDuplicar";
+            colDuplicar.Text = "📋 Duplicar";
+            colDuplicar.UseColumnTextForButtonValue = true;
+            colDuplicar.FillWeight = 90;
+            colDuplicar.FlatStyle = FlatStyle.Flat;
+            colDuplicar.DefaultCellStyle = new DataGridViewCellStyle
+            {
+                BackColor = Color.FromArgb(255, 152, 0),
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                SelectionBackColor = Color.FromArgb(255, 152, 0),
+                SelectionForeColor = Color.White,
+                Alignment = DataGridViewContentAlignment.MiddleCenter
+            };
+            // 
+            // colExcluir
+            // 
+            colExcluir.HeaderText = "";
+            colExcluir.Name = "colExcluir";
+            colExcluir.Text = "❌";
+            colExcluir.UseColumnTextForButtonValue = true;
+            colExcluir.FillWeight = 50;
+            colExcluir.FlatStyle = FlatStyle.Flat;
+            colExcluir.DefaultCellStyle = new DataGridViewCellStyle
+            {
+                BackColor = Color.FromArgb(183, 28, 28),
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                SelectionBackColor = Color.FromArgb(183, 28, 28),
+                SelectionForeColor = Color.White,
+                Alignment = DataGridViewContentAlignment.MiddleCenter
+            };
+            // 
             // FormListarApostas
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -299,6 +400,7 @@ namespace GeradorApostasLotofacil
         private Button btnListasApostas;
         private DataGridView dgv_listaApostas;
         private Button btn_exportarApostas;
+        private Button btn_exportarPdf;
         private DataGridViewTextBoxColumn PrimeiroNumero;
         private DataGridViewTextBoxColumn SegundoNumero;
         private DataGridViewTextBoxColumn TerceiroNumero;
@@ -317,5 +419,11 @@ namespace GeradorApostasLotofacil
         private DataGridViewTextBoxColumn colAcertos;
         private DataGridViewTextBoxColumn colData;
         private DataGridViewButtonColumn colResortear;
+        private DataGridViewButtonColumn colDuplicar;
+        private DataGridViewButtonColumn colExcluir;
+        private Label lblPeriodo;
+        private DateTimePicker dtpDe;
+        private Label lblAte;
+        private DateTimePicker dtpAte;
     }
 }

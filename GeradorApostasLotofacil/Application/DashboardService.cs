@@ -106,6 +106,16 @@ namespace GeradorApostasLotofacil.Application
                 dashboard.DistribuicaoAcertos = distribuicao;
                 dashboard.MelhorAcerto = melhorAcertoGeral;
 
+                // Taxa de acerto: percentual de jogos com 11+ acertos
+                int totalJogosConferidos = ultimosJogosList.Count;
+                int jogosComAcerto = distribuicao.Values.Sum();
+                dashboard.TaxaAcerto = totalJogosConferidos > 0
+                    ? (decimal)jogosComAcerto / totalJogosConferidos * 100
+                    : 0;
+
+                // Número da sorte: número mais usado pelo usuário
+                dashboard.NumeroSorte = todosNumeros.Count > 0 ? todosNumeros[0].Numero : 0;
+
                 return dashboard;
 
             }

@@ -30,6 +30,12 @@ namespace GeradorApostasLotofacil
             cardUltimaAposta = new Panel();
             lblUltimaAposta = new Label();
             lblTituloUltimaAposta = new Label();
+            cardTaxaAcerto = new Panel();
+            lblTaxaAcerto = new Label();
+            lblTituloTaxaAcerto = new Label();
+            cardNumeroSorte = new Panel();
+            lblNumeroSorte = new Label();
+            lblTituloNumeroSorte = new Label();
             panelGraficoAcertos = new Panel();
             panelInferior = new Panel();
             panelNumerosFrequentes = new Panel();
@@ -46,6 +52,8 @@ namespace GeradorApostasLotofacil
             cardTotalJogos.SuspendLayout();
             cardMelhorAcerto.SuspendLayout();
             cardUltimaAposta.SuspendLayout();
+            cardTaxaAcerto.SuspendLayout();
+            cardNumeroSorte.SuspendLayout();
             panelInferior.SuspendLayout();
             panelNumerosFrequentes.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvNumerosFrequentes).BeginInit();
@@ -84,11 +92,13 @@ namespace GeradorApostasLotofacil
             panelCards.Controls.Add(cardTotalJogos);
             panelCards.Controls.Add(cardMelhorAcerto);
             panelCards.Controls.Add(cardUltimaAposta);
+            panelCards.Controls.Add(cardTaxaAcerto);
+            panelCards.Controls.Add(cardNumeroSorte);
             panelCards.Dock = DockStyle.Top;
             panelCards.Location = new Point(0, 50);
             panelCards.Name = "panelCards";
             panelCards.Padding = new Padding(10, 10, 10, 5);
-            panelCards.Size = new Size(1050, 120);
+            panelCards.Size = new Size(1050, 230);
 
             // 
             // cardTotalApostas
@@ -203,11 +213,67 @@ namespace GeradorApostasLotofacil
             lblUltimaAposta.Text = "—";
 
             // 
+            // cardTaxaAcerto
+            // 
+            cardTaxaAcerto.BackColor = Color.FromArgb(45, 55, 72);
+            cardTaxaAcerto.Controls.Add(lblTaxaAcerto);
+            cardTaxaAcerto.Controls.Add(lblTituloTaxaAcerto);
+            cardTaxaAcerto.Location = new Point(15, 115);
+            cardTaxaAcerto.Name = "cardTaxaAcerto";
+            cardTaxaAcerto.Size = new Size(230, 90);
+
+            // 
+            // lblTituloTaxaAcerto
+            // 
+            lblTituloTaxaAcerto.Font = new Font("Segoe UI", 9F);
+            lblTituloTaxaAcerto.ForeColor = Color.FromArgb(180, 130, 255);
+            lblTituloTaxaAcerto.Location = new Point(15, 10);
+            lblTituloTaxaAcerto.Size = new Size(200, 20);
+            lblTituloTaxaAcerto.Text = "TAXA 11+";
+
+            // 
+            // lblTaxaAcerto
+            // 
+            lblTaxaAcerto.Font = new Font("Segoe UI", 22F, FontStyle.Bold);
+            lblTaxaAcerto.ForeColor = Color.White;
+            lblTaxaAcerto.Location = new Point(15, 35);
+            lblTaxaAcerto.Size = new Size(200, 45);
+            lblTaxaAcerto.Text = "—";
+
+            // 
+            // cardNumeroSorte
+            // 
+            cardNumeroSorte.BackColor = Color.FromArgb(45, 55, 72);
+            cardNumeroSorte.Controls.Add(lblNumeroSorte);
+            cardNumeroSorte.Controls.Add(lblTituloNumeroSorte);
+            cardNumeroSorte.Location = new Point(260, 115);
+            cardNumeroSorte.Name = "cardNumeroSorte";
+            cardNumeroSorte.Size = new Size(230, 90);
+
+            // 
+            // lblTituloNumeroSorte
+            // 
+            lblTituloNumeroSorte.Font = new Font("Segoe UI", 9F);
+            lblTituloNumeroSorte.ForeColor = Color.FromArgb(255, 215, 0);
+            lblTituloNumeroSorte.Location = new Point(15, 10);
+            lblTituloNumeroSorte.Size = new Size(200, 20);
+            lblTituloNumeroSorte.Text = "Nº DA SORTE";
+
+            // 
+            // lblNumeroSorte
+            // 
+            lblNumeroSorte.Font = new Font("Segoe UI", 22F, FontStyle.Bold);
+            lblNumeroSorte.ForeColor = Color.White;
+            lblNumeroSorte.Location = new Point(15, 35);
+            lblNumeroSorte.Size = new Size(200, 45);
+            lblNumeroSorte.Text = "—";
+
+            // 
             // panelGraficoAcertos
             // 
             panelGraficoAcertos.BackColor = Color.FromArgb(45, 55, 72);
             panelGraficoAcertos.Dock = DockStyle.Top;
-            panelGraficoAcertos.Location = new Point(0, 170);
+            panelGraficoAcertos.Location = new Point(0, 280);
             panelGraficoAcertos.Name = "panelGraficoAcertos";
             panelGraficoAcertos.Size = new Size(1050, 180);
             panelGraficoAcertos.Paint += panelGraficoAcertos_Paint;
@@ -218,7 +284,7 @@ namespace GeradorApostasLotofacil
             panelInferior.Controls.Add(panelUltimasApostas);
             panelInferior.Controls.Add(panelNumerosFrequentes);
             panelInferior.Dock = DockStyle.Fill;
-            panelInferior.Location = new Point(0, 350);
+            panelInferior.Location = new Point(0, 460);
             panelInferior.Name = "panelInferior";
             panelInferior.Size = new Size(1050, 250);
 
@@ -349,6 +415,8 @@ namespace GeradorApostasLotofacil
             cardTotalJogos.ResumeLayout(false);
             cardMelhorAcerto.ResumeLayout(false);
             cardUltimaAposta.ResumeLayout(false);
+            cardTaxaAcerto.ResumeLayout(false);
+            cardNumeroSorte.ResumeLayout(false);
             panelInferior.ResumeLayout(false);
             panelNumerosFrequentes.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvNumerosFrequentes).EndInit();
@@ -373,6 +441,12 @@ namespace GeradorApostasLotofacil
         private Panel cardUltimaAposta;
         private Label lblUltimaAposta;
         private Label lblTituloUltimaAposta;
+        private Panel cardTaxaAcerto;
+        private Label lblTaxaAcerto;
+        private Label lblTituloTaxaAcerto;
+        private Panel cardNumeroSorte;
+        private Label lblNumeroSorte;
+        private Label lblTituloNumeroSorte;
         private Panel panelGraficoAcertos;
         private Panel panelInferior;
         private Panel panelNumerosFrequentes;

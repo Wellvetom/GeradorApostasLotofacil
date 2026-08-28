@@ -3,6 +3,7 @@ namespace GeradorApostasLotofacil.Helper
     public class ApostaGridViewModel
     {
         public int Id { get; set; }
+        public int ApostaId { get; set; }
         public string DataInclusao { get; set; } = string.Empty;
         public string Usuario { get; set; } = string.Empty;
         public int Acertos { get; set; }

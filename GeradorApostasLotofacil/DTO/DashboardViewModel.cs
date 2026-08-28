@@ -8,6 +8,16 @@ namespace GeradorApostasLotofacil.DTO
         public decimal MelhorAcerto { get; set; }
 
         /// <summary>
+        /// Percentual de jogos com 11+ acertos
+        /// </summary>
+        public decimal TaxaAcerto { get; set; }
+
+        /// <summary>
+        /// Número mais utilizado pelo usuário
+        /// </summary>
+        public int NumeroSorte { get; set; }
+
+        /// <summary>
         /// Distribuição de acertos: chave = quantidade de acertos (11-15), valor = quantidade de jogos
         /// </summary>
         public Dictionary<int, int> DistribuicaoAcertos { get; set; } = new();

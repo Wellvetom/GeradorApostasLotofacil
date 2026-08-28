@@ -80,6 +80,8 @@ namespace GeradorApostasLotofacil
                 lblTotalJogos.Text = _dados.TotalJogos.ToString();
                 lblMelhorAcerto.Text = _dados.MelhorAcerto > 0 ? $"{_dados.MelhorAcerto} acertos" : "—";
                 lblUltimaAposta.Text = _dados.UltimaApostaData?.ToString("dd/MM/yyyy") ?? "—";
+                lblTaxaAcerto.Text = _dados.TaxaAcerto > 0 ? $"{_dados.TaxaAcerto:F1}%" : "—";
+                lblNumeroSorte.Text = _dados.NumeroSorte > 0 ? _dados.NumeroSorte.ToString("D2") : "—";
             }
             catch (Exception ex)
             {

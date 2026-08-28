@@ -46,7 +46,7 @@ namespace GeradorApostasLotofacil
         {
             try
             {
-                _loadingPanel.Exibir("Carregando dados administrativos...");
+                _loadingPanel.Exibir("Carregando dados...");
 
                 // Executa o serviço completo em Task.Run pois ele contém processamento pesado O(n²)
                 // O DbContext é scoped e usado apenas dentro desta chamada
