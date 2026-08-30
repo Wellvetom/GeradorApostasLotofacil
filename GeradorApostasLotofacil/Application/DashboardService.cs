@@ -56,6 +56,12 @@ namespace GeradorApostasLotofacil.Application
                 int melhorAcertoGeral = 0;
                 var ultimosJogosList = new List<DashboardJogoResumo>();
 
+                // Acumuladores de aderência (apenas jogos não premiados, < 11 acertos)
+                // Peso maior para números sorteados que o usuário deixou de fora ("oportunidade perdida")
+                const int PESO_ACERTOU = 2;   // número que o usuário jogou e saiu no sorteio
+                const int PESO_PERDEU = 3;    // número que saiu no sorteio mas o usuário não jogou
+                var aderenciaScore = new Dictionary<int, int>();
+
                 foreach (var aposta in apostasUsuario)
                 {
                     var resultadoOficial = resultadosOficiais
@@ -67,14 +73,16 @@ namespace GeradorApostasLotofacil.Application
                     foreach (var jogo in aposta.Jogos)
                     {
                         int acertos = 0;
+                        List<int>? numerosResultado = null;
 
                         if (resultadoOficial != null)
                         {
                             var jogoResultado = resultadoOficial.Jogos.FirstOrDefault();
                             if (jogoResultado != null)
                             {
+                                numerosResultado = jogoResultado.Numeros;
                                 acertos = jogo.Numeros
-                                    .Intersect(jogoResultado.Numeros)
+                                    .Intersect(numerosResultado)
                                     .Count();
                             }
                         }
@@ -83,6 +91,19 @@ namespace GeradorApostasLotofacil.Application
                         {
                             distribuicao.TryGetValue(acertos, out int count);
                             distribuicao[acertos] = count + 1;
+                        }
+                        else if (numerosResultado != null)
+                        {
+                            // Jogo conferido e NÃO premiado: alimenta o score de aderência
+                            foreach (var numeroSorteado in numerosResultado)
+                            {
+                                int peso = jogo.Numeros.Contains(numeroSorteado)
+                                    ? PESO_ACERTOU
+                                    : PESO_PERDEU;
+
+                                aderenciaScore.TryGetValue(numeroSorteado, out int atual);
+                                aderenciaScore[numeroSorteado] = atual + peso;
+                            }
                         }
 
                         if (acertos > melhorAcertoGeral)
@@ -99,6 +120,15 @@ namespace GeradorApostasLotofacil.Application
                         });
                     }
                 }
+
+                // Top 10 números com maior aderência para o próximo jogo
+                dashboard.NumerosAderencia = aderenciaScore
+                    .Select(kv => (Numero: kv.Key, Score: kv.Value))
+                    .OrderByDescending(x => x.Score)
+                    .ThenBy(x => x.Numero)
+                    .Take(10)
+                    .ToList();
+
 
                 // Últimos 10 jogos (já estão ordenados por data decrescente da aposta)
                 dashboard.UltimosJogos = ultimosJogosList.Take(10).ToList();

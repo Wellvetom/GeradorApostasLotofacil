@@ -40,10 +40,13 @@ namespace GeradorApostasLotofacil
             panelInferior = new Panel();
             panelNumerosFrequentes = new Panel();
             lblTituloNumeros = new Label();
-            dgvNumerosFrequentes = new DataGridView();
+            pieNumerosFrequentes = new Controls.PieChartControl();
             panelUltimasApostas = new Panel();
             lblTituloUltimasApostas = new Label();
             dgvUltimasApostas = new DataGridView();
+            panelAderencia = new Panel();
+            lblTituloAderencia = new Label();
+            pieAderencia = new Controls.PieChartControl();
             lblStatus = new Label();
             lblTituloDashboard = new Label();
 
@@ -56,9 +59,9 @@ namespace GeradorApostasLotofacil
             cardNumeroSorte.SuspendLayout();
             panelInferior.SuspendLayout();
             panelNumerosFrequentes.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)dgvNumerosFrequentes).BeginInit();
             panelUltimasApostas.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvUltimasApostas).BeginInit();
+            panelAderencia.SuspendLayout();
             SuspendLayout();
 
             // 
@@ -282,6 +285,7 @@ namespace GeradorApostasLotofacil
             // panelInferior
             // 
             panelInferior.Controls.Add(panelUltimasApostas);
+            panelInferior.Controls.Add(panelAderencia);
             panelInferior.Controls.Add(panelNumerosFrequentes);
             panelInferior.Dock = DockStyle.Fill;
             panelInferior.Location = new Point(0, 460);
@@ -292,7 +296,7 @@ namespace GeradorApostasLotofacil
             // panelNumerosFrequentes
             // 
             panelNumerosFrequentes.BackColor = Color.FromArgb(45, 55, 72);
-            panelNumerosFrequentes.Controls.Add(dgvNumerosFrequentes);
+            panelNumerosFrequentes.Controls.Add(pieNumerosFrequentes);
             panelNumerosFrequentes.Controls.Add(lblTituloNumeros);
             panelNumerosFrequentes.Dock = DockStyle.Left;
             panelNumerosFrequentes.Location = new Point(0, 0);
@@ -313,33 +317,13 @@ namespace GeradorApostasLotofacil
             lblTituloNumeros.Text = "🔢 Top 10 Números Mais Usados";
 
             // 
-            // dgvNumerosFrequentes
+            // pieNumerosFrequentes
             // 
-            dgvNumerosFrequentes.AllowUserToAddRows = false;
-            dgvNumerosFrequentes.AllowUserToDeleteRows = false;
-            dgvNumerosFrequentes.BackgroundColor = Color.FromArgb(55, 65, 82);
-            dgvNumerosFrequentes.BorderStyle = BorderStyle.None;
-            dgvNumerosFrequentes.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
-            {
-                BackColor = Color.FromArgb(63, 81, 181),
-                ForeColor = Color.White,
-                Font = new Font("Segoe UI", 9F, FontStyle.Bold)
-            };
-            dgvNumerosFrequentes.DefaultCellStyle = new DataGridViewCellStyle
-            {
-                BackColor = Color.FromArgb(55, 65, 82),
-                ForeColor = Color.White,
-                SelectionBackColor = Color.FromArgb(75, 85, 102),
-                SelectionForeColor = Color.White
-            };
-            dgvNumerosFrequentes.Dock = DockStyle.Fill;
-            dgvNumerosFrequentes.EnableHeadersVisualStyles = false;
-            dgvNumerosFrequentes.GridColor = Color.FromArgb(70, 80, 95);
-            dgvNumerosFrequentes.Location = new Point(10, 40);
-            dgvNumerosFrequentes.Name = "dgvNumerosFrequentes";
-            dgvNumerosFrequentes.ReadOnly = true;
-            dgvNumerosFrequentes.RowHeadersVisible = false;
-            dgvNumerosFrequentes.Size = new Size(330, 200);
+            pieNumerosFrequentes.BackColor = Color.FromArgb(55, 65, 82);
+            pieNumerosFrequentes.Dock = DockStyle.Fill;
+            pieNumerosFrequentes.Location = new Point(10, 40);
+            pieNumerosFrequentes.Name = "pieNumerosFrequentes";
+            pieNumerosFrequentes.Size = new Size(330, 200);
 
             // 
             // panelUltimasApostas
@@ -395,6 +379,39 @@ namespace GeradorApostasLotofacil
             dgvUltimasApostas.Size = new Size(680, 200);
 
             // 
+            // panelAderencia
+            // 
+            panelAderencia.BackColor = Color.FromArgb(45, 55, 72);
+            panelAderencia.Controls.Add(pieAderencia);
+            panelAderencia.Controls.Add(lblTituloAderencia);
+            panelAderencia.Dock = DockStyle.Right;
+            panelAderencia.Location = new Point(700, 0);
+            panelAderencia.Name = "panelAderencia";
+            panelAderencia.Padding = new Padding(10);
+            panelAderencia.Size = new Size(350, 250);
+
+            // 
+            // lblTituloAderencia
+            // 
+            lblTituloAderencia.Dock = DockStyle.Top;
+            lblTituloAderencia.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblTituloAderencia.ForeColor = Color.White;
+            lblTituloAderencia.Location = new Point(10, 10);
+            lblTituloAderencia.Name = "lblTituloAderencia";
+            lblTituloAderencia.Padding = new Padding(5);
+            lblTituloAderencia.Size = new Size(330, 30);
+            lblTituloAderencia.Text = "🎯 Top 10 Aderência (próximo jogo)";
+
+            // 
+            // pieAderencia
+            // 
+            pieAderencia.BackColor = Color.FromArgb(55, 65, 82);
+            pieAderencia.Dock = DockStyle.Fill;
+            pieAderencia.Location = new Point(10, 40);
+            pieAderencia.Name = "pieAderencia";
+            pieAderencia.Size = new Size(330, 200);
+
+            // 
             // FormDashboard
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -419,9 +436,9 @@ namespace GeradorApostasLotofacil
             cardNumeroSorte.ResumeLayout(false);
             panelInferior.ResumeLayout(false);
             panelNumerosFrequentes.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)dgvNumerosFrequentes).EndInit();
             panelUltimasApostas.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvUltimasApostas).EndInit();
+            panelAderencia.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -451,10 +468,13 @@ namespace GeradorApostasLotofacil
         private Panel panelInferior;
         private Panel panelNumerosFrequentes;
         private Label lblTituloNumeros;
-        private DataGridView dgvNumerosFrequentes;
+        private Controls.PieChartControl pieNumerosFrequentes;
         private Panel panelUltimasApostas;
         private Label lblTituloUltimasApostas;
         private DataGridView dgvUltimasApostas;
+        private Panel panelAderencia;
+        private Label lblTituloAderencia;
+        private Controls.PieChartControl pieAderencia;
         private Label lblStatus;
         private Label lblTituloDashboard;
     }

@@ -38,6 +38,10 @@ namespace GeradorApostasLotofacil
                 if (ctrl != _loadingPanel)
                     ctrl.Visible = true;
             }
+
+            // Reinicia a animação dos gráficos agora que estão visíveis
+            pieNumerosFrequentes.Replay();
+            pieAderencia.Replay();
         }
 
         private async Task CarregarDashboard()
@@ -57,6 +61,7 @@ namespace GeradorApostasLotofacil
                 PreencherCards();
                 PreencherNumerosFrequentes();
                 PreencherUltimosJogos();
+                PreencherAderencia();
                 panelGraficoAcertos.Invalidate();
 
                 _loadingPanel.Ocultar();
@@ -97,11 +102,10 @@ namespace GeradorApostasLotofacil
             {
                 if (_dados == null) return;
 
-                dgvNumerosFrequentes.DataSource = _dados.NumerosFrequentes
-                    .Select(n => new { Número = n.Numero.ToString("D2"), Frequência = n.Frequencia })
-                    .ToList();
-
-                dgvNumerosFrequentes.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                pieNumerosFrequentes.Titulo = string.Empty;
+                pieNumerosFrequentes.SetData(
+                    _dados.NumerosFrequentes
+                        .Select(n => new Controls.PieChartControl.Fatia(n.Numero.ToString("D2"), n.Frequencia)));
             }
             catch (Exception ex)
             {
@@ -138,6 +142,29 @@ namespace GeradorApostasLotofacil
                 MessageBox.Show(
                     $"Erro ao preencher últimos jogos.\n\nErro: {ex.Message}",
                     "Erro - PreencherUltimosJogos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void PreencherAderencia()
+        {
+            try
+            {
+                if (_dados == null) return;
+
+                pieAderencia.Titulo = string.Empty;
+                pieAderencia.SetData(
+                    _dados.NumerosAderencia
+                        .Select(n => new Controls.PieChartControl.Fatia(n.Numero.ToString("D2"), n.Score)));
+            }
+            catch (Exception ex)
+            {
+                var info = _dados?.NumerosAderencia != null
+                    ? $"Count={_dados.NumerosAderencia.Count}"
+                    : "null";
+
+                MessageBox.Show(
+                    $"Erro ao preencher aderência.\n\nDados: {info}\n\nErro: {ex.Message}\n\n{ex.StackTrace}",
+                    "Erro - PreencherAderencia", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 

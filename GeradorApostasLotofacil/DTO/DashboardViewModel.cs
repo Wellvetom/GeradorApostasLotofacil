@@ -31,6 +31,13 @@ namespace GeradorApostasLotofacil.DTO
         /// Últimos 10 jogos do usuário
         /// </summary>
         public List<DashboardJogoResumo> UltimosJogos { get; set; } = new();
+
+        /// <summary>
+        /// Top 10 números com maior aderência para o próximo jogo, calculados a partir
+        /// das apostas já conferidas e não premiadas (menos de 11 acertos).
+        /// (Numero, Score de aderência)
+        /// </summary>
+        public List<(int Numero, int Score)> NumerosAderencia { get; set; } = new();
     }
 
     public class DashboardJogoResumo

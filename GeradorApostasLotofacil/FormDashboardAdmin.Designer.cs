@@ -33,10 +33,10 @@ namespace GeradorApostasLotofacil
             panelGridsTop = new Panel();
             panelMaisSairam = new Panel();
             lblTituloMaisSairam = new Label();
-            dgvMaisSairam = new DataGridView();
+            pieMaisSairam = new Controls.PieChartControl();
             panelMenosSairam = new Panel();
             lblTituloMenosSairam = new Label();
-            dgvMenosSairam = new DataGridView();
+            pieMenosSairam = new Controls.PieChartControl();
             panelUltimosSorteios = new Panel();
             lblTituloUltimosSorteios = new Label();
             dgvUltimosSorteios = new DataGridView();
@@ -60,9 +60,7 @@ namespace GeradorApostasLotofacil
             cardJogosRepetidos.SuspendLayout();
             panelGridsTop.SuspendLayout();
             panelMaisSairam.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)dgvMaisSairam).BeginInit();
             panelMenosSairam.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)dgvMenosSairam).BeginInit();
             panelUltimosSorteios.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvUltimosSorteios).BeginInit();
             panelGridsBottom.SuspendLayout();
@@ -177,55 +175,37 @@ namespace GeradorApostasLotofacil
 
             // panelMaisSairam
             panelMaisSairam.BackColor = Color.FromArgb(45, 55, 72);
-            panelMaisSairam.Controls.Add(dgvMaisSairam);
+            panelMaisSairam.Controls.Add(pieMaisSairam);
             panelMaisSairam.Controls.Add(lblTituloMaisSairam);
             panelMaisSairam.Dock = DockStyle.Left;
             panelMaisSairam.Padding = new Padding(6);
-            panelMaisSairam.Size = new Size(210, 220);
+            panelMaisSairam.Size = new Size(330, 220);
             lblTituloMaisSairam.Dock = DockStyle.Top;
             lblTituloMaisSairam.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblTituloMaisSairam.ForeColor = Color.FromArgb(100, 255, 100);
             lblTituloMaisSairam.Padding = new Padding(4);
-            lblTituloMaisSairam.Size = new Size(198, 26);
+            lblTituloMaisSairam.Size = new Size(318, 26);
             lblTituloMaisSairam.Text = "🔥 Mais Sorteados";
-            dgvMaisSairam.AllowUserToAddRows = false;
-            dgvMaisSairam.AllowUserToDeleteRows = false;
-            dgvMaisSairam.BackgroundColor = Color.FromArgb(55, 65, 82);
-            dgvMaisSairam.BorderStyle = BorderStyle.None;
-            dgvMaisSairam.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle { BackColor = Color.FromArgb(50, 55, 75), ForeColor = Color.FromArgb(160, 170, 200), Font = new Font("Segoe UI", 8F, FontStyle.Bold) };
-            dgvMaisSairam.DefaultCellStyle = new DataGridViewCellStyle { BackColor = Color.FromArgb(55, 65, 82), ForeColor = Color.White, SelectionBackColor = Color.FromArgb(75, 85, 102), SelectionForeColor = Color.White, Font = new Font("Segoe UI", 9F, FontStyle.Bold) };
-            dgvMaisSairam.Dock = DockStyle.Fill;
-            dgvMaisSairam.EnableHeadersVisualStyles = false;
-            dgvMaisSairam.GridColor = Color.FromArgb(70, 80, 95);
-            dgvMaisSairam.ReadOnly = true;
-            dgvMaisSairam.RowHeadersVisible = false;
-            dgvMaisSairam.RowTemplate.Height = 24;
+            pieMaisSairam.BackColor = Color.FromArgb(55, 65, 82);
+            pieMaisSairam.Dock = DockStyle.Fill;
+            pieMaisSairam.Name = "pieMaisSairam";
 
             // panelMenosSairam
             panelMenosSairam.BackColor = Color.FromArgb(45, 55, 72);
-            panelMenosSairam.Controls.Add(dgvMenosSairam);
+            panelMenosSairam.Controls.Add(pieMenosSairam);
             panelMenosSairam.Controls.Add(lblTituloMenosSairam);
             panelMenosSairam.Dock = DockStyle.Left;
             panelMenosSairam.Padding = new Padding(6);
-            panelMenosSairam.Size = new Size(210, 220);
+            panelMenosSairam.Size = new Size(330, 220);
             lblTituloMenosSairam.Dock = DockStyle.Top;
             lblTituloMenosSairam.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             lblTituloMenosSairam.ForeColor = Color.FromArgb(255, 150, 150);
             lblTituloMenosSairam.Padding = new Padding(4);
-            lblTituloMenosSairam.Size = new Size(198, 26);
+            lblTituloMenosSairam.Size = new Size(318, 26);
             lblTituloMenosSairam.Text = "❄️ Menos Sorteados";
-            dgvMenosSairam.AllowUserToAddRows = false;
-            dgvMenosSairam.AllowUserToDeleteRows = false;
-            dgvMenosSairam.BackgroundColor = Color.FromArgb(55, 65, 82);
-            dgvMenosSairam.BorderStyle = BorderStyle.None;
-            dgvMenosSairam.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle { BackColor = Color.FromArgb(50, 55, 75), ForeColor = Color.FromArgb(160, 170, 200), Font = new Font("Segoe UI", 8F, FontStyle.Bold) };
-            dgvMenosSairam.DefaultCellStyle = new DataGridViewCellStyle { BackColor = Color.FromArgb(55, 65, 82), ForeColor = Color.White, SelectionBackColor = Color.FromArgb(75, 85, 102), SelectionForeColor = Color.White, Font = new Font("Segoe UI", 9F, FontStyle.Bold) };
-            dgvMenosSairam.Dock = DockStyle.Fill;
-            dgvMenosSairam.EnableHeadersVisualStyles = false;
-            dgvMenosSairam.GridColor = Color.FromArgb(70, 80, 95);
-            dgvMenosSairam.ReadOnly = true;
-            dgvMenosSairam.RowHeadersVisible = false;
-            dgvMenosSairam.RowTemplate.Height = 24;
+            pieMenosSairam.BackColor = Color.FromArgb(55, 65, 82);
+            pieMenosSairam.Dock = DockStyle.Fill;
+            pieMenosSairam.Name = "pieMenosSairam";
 
             // panelUltimosSorteios
             panelUltimosSorteios.BackColor = Color.FromArgb(45, 55, 72);
@@ -357,9 +337,7 @@ namespace GeradorApostasLotofacil
             cardJogosRepetidos.ResumeLayout(false);
             panelGridsTop.ResumeLayout(false);
             panelMaisSairam.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)dgvMaisSairam).EndInit();
             panelMenosSairam.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)dgvMenosSairam).EndInit();
             panelUltimosSorteios.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvUltimosSorteios).EndInit();
             panelGridsBottom.ResumeLayout(false);
@@ -391,10 +369,10 @@ namespace GeradorApostasLotofacil
         private Panel panelGridsTop;
         private Panel panelMaisSairam;
         private Label lblTituloMaisSairam;
-        private DataGridView dgvMaisSairam;
+        private Controls.PieChartControl pieMaisSairam;
         private Panel panelMenosSairam;
         private Label lblTituloMenosSairam;
-        private DataGridView dgvMenosSairam;
+        private Controls.PieChartControl pieMenosSairam;
         private Panel panelUltimosSorteios;
         private Label lblTituloUltimosSorteios;
         private DataGridView dgvUltimosSorteios;

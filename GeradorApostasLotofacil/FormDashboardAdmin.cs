@@ -40,6 +40,10 @@ namespace GeradorApostasLotofacil
                 if (ctrl != _loadingPanel)
                     ctrl.Visible = true;
             }
+
+            // Reinicia a animação dos gráficos agora que estão visíveis
+            pieMaisSairam.Replay();
+            pieMenosSairam.Replay();
         }
 
         private async Task CarregarDashboard()
@@ -93,11 +97,9 @@ namespace GeradorApostasLotofacil
             {
                 if (_dados == null) return;
 
-                dgvMaisSairam.DataSource = _dados.NumerosQueMaisSairam
-                    .Select(n => new { Número = n.Numero.ToString("D2"), Vezes = n.Frequencia })
-                    .ToList();
-
-                dgvMaisSairam.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                pieMaisSairam.SetData(
+                    _dados.NumerosQueMaisSairam
+                        .Select(n => new Controls.PieChartControl.Fatia(n.Numero.ToString("D2"), n.Frequencia)));
             }
             catch (Exception ex)
             {
@@ -111,11 +113,9 @@ namespace GeradorApostasLotofacil
             {
                 if (_dados == null) return;
 
-                dgvMenosSairam.DataSource = _dados.NumerosQueMenosSairam
-                    .Select(n => new { Número = n.Numero.ToString("D2"), Vezes = n.Frequencia })
-                    .ToList();
-
-                dgvMenosSairam.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                pieMenosSairam.SetData(
+                    _dados.NumerosQueMenosSairam
+                        .Select(n => new Controls.PieChartControl.Fatia(n.Numero.ToString("D2"), n.Frequencia)));
             }
             catch (Exception ex)
             {
