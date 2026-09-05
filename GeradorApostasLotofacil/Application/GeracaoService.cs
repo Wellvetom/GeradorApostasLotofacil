@@ -56,65 +56,76 @@ namespace GeradorApostasLotofacil.Application
                 Jogos = new List<JogoModel>()
             };
 
-            // Quantidade de números aleatórios (restante para completar 15)
-            int qtdAleatorios = 15 - qtdMaisSorteados - qtdMenosSorteados;
+            // Limite de tentativas para evitar loop infinito caso o espaço de
+            // combinações inéditas esteja praticamente esgotado.
+            int quantidadeAlvo = (int)quantidadeJogos;
+            const int maxTentativasPorJogo = 1000;
+            int tentativasSemSucesso = 0;
 
-            while (aposta.Jogos.Count < (int)quantidadeJogos)
+            while (aposta.Jogos.Count < quantidadeAlvo)
             {
-                // Seleciona N números dos mais sorteados (aleatoriamente dentre os top 15)
-                var escolhidosMais = maisSorteados
-                    .OrderBy(x => random.Next())
-                    .Take(qtdMaisSorteados)
-                    .ToList();
+                // Conjunto de números do jogo em construção. O HashSet garante,
+                // por definição, que não haverá números repetidos no mesmo jogo.
+                var numerosSelecionados = new HashSet<int>();
 
-                // Seleciona N números dos menos sorteados (aleatoriamente dentre os bottom 15)
-                var escolhidosMenos = menosSorteados
-                    .OrderBy(x => random.Next())
-                    .Take(qtdMenosSorteados)
-                    .ToList();
+                // 1) Seleciona números dos MAIS sorteados (aleatoriamente dentre o pool)
+                foreach (var numero in maisSorteados.OrderBy(_ => random.Next()))
+                {
+                    if (numerosSelecionados.Count >= qtdMaisSorteados) break;
+                    numerosSelecionados.Add(numero);
+                }
 
-                // Números já usados
-                var numerosUsados = escolhidosMais.Concat(escolhidosMenos).ToHashSet();
+                // 2) Seleciona números dos MENOS sorteados, ignorando os que já
+                //    foram escolhidos no passo anterior (evita sobreposição entre
+                //    os pools de mais e menos sorteados, que compartilham números).
+                int alvoAposMenos = numerosSelecionados.Count + qtdMenosSorteados;
+                foreach (var numero in menosSorteados.OrderBy(_ => random.Next()))
+                {
+                    if (numerosSelecionados.Count >= alvoAposMenos) break;
+                    numerosSelecionados.Add(numero); // Add ignora duplicatas
+                }
 
-                // Números disponíveis para preencher o restante (exclui os já usados)
-                var numerosDisponiveis = todosNumeros
-                    .Where(n => !numerosUsados.Contains(n))
-                    .ToList();
+                // 3) Completa o restante com números aleatórios ainda não usados,
+                //    até totalizar 15 números distintos.
+                foreach (var numero in todosNumeros.OrderBy(_ => random.Next()))
+                {
+                    if (numerosSelecionados.Count >= 15) break;
+                    numerosSelecionados.Add(numero); // Add ignora duplicatas
+                }
 
-                // Escolhe aleatórios dos restantes
-                var aleatorios = numerosDisponiveis
-                    .OrderBy(x => random.Next())
-                    .Take(qtdAleatorios)
-                    .ToList();
-
-                // Monta o jogo final com 15 números
-                var numerosJogo = escolhidosMais
-                    .Concat(escolhidosMenos)
-                    .Concat(aleatorios)
+                // Monta o jogo final ordenado
+                var numerosJogo = numerosSelecionados
                     .OrderBy(x => x)
                     .ToList();
+
+                // Salvaguarda: garante 15 números distintos antes de aceitar o jogo.
+                if (numerosJogo.Count != 15 || numerosJogo.Distinct().Count() != 15)
+                    continue;
 
                 // Gera hash único
                 var hash = JogoHelper.GerarHashJogo(numerosJogo);
 
-                // Já existe no banco?
-                if (hashesExistentes.Contains(hash))
+                // Já existe no banco ou já foi gerado nessa execução?
+                if (hashesExistentes.Contains(hash) || hashesGerados.Contains(hash))
+                {
+                    // Proteção contra loop infinito quando não há mais jogos inéditos possíveis
+                    if (++tentativasSemSucesso >= maxTentativasPorJogo)
+                    {
+                        throw new InvalidOperationException(
+                            "Não foi possível gerar novos jogos inéditos com os parâmetros informados. " +
+                            "Tente reduzir a quantidade de jogos ou ajustar os filtros.");
+                    }
                     continue;
+                }
 
-                // Já foi gerado nessa aposta?
-                if (hashesGerados.Contains(hash))
-                    continue;
-
-                // Adiciona controle
+                // Sucesso: registra e adiciona o jogo
+                tentativasSemSucesso = 0;
                 hashesGerados.Add(hash);
 
-                // Cria jogo
-                var jogo = new JogoModel
+                aposta.Jogos.Add(new JogoModel
                 {
                     Numeros = numerosJogo
-                };
-
-                aposta.Jogos.Add(jogo);
+                });
             }
 
             return aposta;

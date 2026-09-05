@@ -56,6 +56,9 @@ namespace GeradorApostasLotofacil
                     }).ToList();
 
                     dgv_listaApostas.DataSource = displayList;
+
+                    // Novos jogos gerados: reabilita a gravação.
+                    btnGravarApostas.Enabled = true;
                 }
             }
             catch (Exception ex)
@@ -74,16 +77,48 @@ namespace GeradorApostasLotofacil
                     return;
                 }
 
+                if (_usuarioSession.UsuarioLogado == null)
+                {
+                    MessageBox.Show("Sessão expirada. Faça login novamente para gravar.", "Aviso", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
                 _loadingPanel.Exibir("Gravando apostas...");
 
                 var retornoRobo = await new LoteriasCaixaRobot.Interface.BuscaSorteioInterface()
                     .BuscaUltimoSorteio(LoteriasCaixaRobot.Request.BaseRequest.TipoSorteio.Lotofacil);
 
+                var dataApuracao = retornoRobo.DataProximoSorteio;
+                var jogosNumeros = _jogosSalvos.Select(j => j.Numeros).ToList();
+
+                // Validação de negócio: já existe esse mesmo lote de jogos gravado
+                // para este usuário e este sorteio?
+                bool duplicada = await _apostaService.ExisteApostaDuplicada(
+                    _usuarioSession.UsuarioLogado.Id,
+                    dataApuracao,
+                    jogosNumeros);
+
+                _loadingPanel.Ocultar();
+
+                if (duplicada)
+                {
+                    var confirmacao = MessageBox.Show(
+                        "Você já gravou uma aposta idêntica para este sorteio.\n\nDeseja gravar novamente mesmo assim?",
+                        "Aposta duplicada",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Warning);
+
+                    if (confirmacao != DialogResult.Yes)
+                        return;
+                }
+
+                _loadingPanel.Exibir("Gravando apostas...");
+
                 var aposta = new ApostaModel()
                 {
                     Jogos = _jogosSalvos,
                     DataInclusao = DateTime.Now,
-                    DataApuracao = retornoRobo.DataProximoSorteio,
+                    DataApuracao = dataApuracao,
                     UsuarioId = _usuarioSession.UsuarioLogado.Id
                 };
 
@@ -91,6 +126,12 @@ namespace GeradorApostasLotofacil
 
                 _loadingPanel.Ocultar();
                 MessageBox.Show("Apostas gravadas com sucesso!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                // Prevenção de gravação duplicada acidental: limpa o estado e
+                // desabilita o botão até que novos jogos sejam gerados.
+                _jogosSalvos = null;
+                dgv_listaApostas.DataSource = null;
+                btnGravarApostas.Enabled = false;
             }
             catch (Exception ex)
             {

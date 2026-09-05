@@ -38,6 +38,12 @@ namespace GeradorApostasLotofacil.DTO
         /// (Numero, Score de aderência)
         /// </summary>
         public List<(int Numero, int Score)> NumerosAderencia { get; set; } = new();
+
+        /// <summary>
+        /// Quantidade de jogos feitos por dia (ordenado por data crescente).
+        /// (Dia, Quantidade de jogos)
+        /// </summary>
+        public List<(DateTime Dia, int Quantidade)> JogosPorDia { get; set; } = new();
     }
 
     public class DashboardJogoResumo

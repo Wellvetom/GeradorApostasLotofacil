@@ -37,6 +37,7 @@ namespace GeradorApostasLotofacil
             lblNumeroSorte = new Label();
             lblTituloNumeroSorte = new Label();
             panelGraficoAcertos = new Panel();
+            panelJogosPorDia = new Panel();
             panelInferior = new Panel();
             panelNumerosFrequentes = new Panel();
             lblTituloNumeros = new Label();
@@ -282,6 +283,16 @@ namespace GeradorApostasLotofacil
             panelGraficoAcertos.Paint += panelGraficoAcertos_Paint;
 
             // 
+            // panelJogosPorDia
+            // 
+            panelJogosPorDia.BackColor = Color.FromArgb(45, 55, 72);
+            panelJogosPorDia.Dock = DockStyle.Top;
+            panelJogosPorDia.Location = new Point(0, 460);
+            panelJogosPorDia.Name = "panelJogosPorDia";
+            panelJogosPorDia.Size = new Size(1050, 180);
+            panelJogosPorDia.Paint += panelJogosPorDia_Paint;
+
+            // 
             // panelInferior
             // 
             panelInferior.Controls.Add(panelUltimasApostas);
@@ -417,8 +428,9 @@ namespace GeradorApostasLotofacil
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(30, 30, 46);
-            ClientSize = new Size(1050, 600);
+            ClientSize = new Size(1050, 780);
             Controls.Add(panelInferior);
+            Controls.Add(panelJogosPorDia);
             Controls.Add(panelGraficoAcertos);
             Controls.Add(panelCards);
             Controls.Add(lblStatus);
@@ -465,6 +477,7 @@ namespace GeradorApostasLotofacil
         private Label lblNumeroSorte;
         private Label lblTituloNumeroSorte;
         private Panel panelGraficoAcertos;
+        private Panel panelJogosPorDia;
         private Panel panelInferior;
         private Panel panelNumerosFrequentes;
         private Label lblTituloNumeros;

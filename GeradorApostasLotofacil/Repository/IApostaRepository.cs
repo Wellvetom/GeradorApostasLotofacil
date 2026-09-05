@@ -5,6 +5,7 @@ namespace GeradorApostasLotofacil.Repository
     public interface IApostaRepository
     {
         Task Salvar(ApostaModel aposta);
+        Task<bool> ExisteApostaDuplicada(int usuarioId, DateTime? dataApuracao, List<List<int>> jogos);
         Task<List<ApostaModel>> ObterTodas();
         Task<List<ApostaModel>> ObterUltimas10();
         Task<ApostaModel?> ObterUltima();

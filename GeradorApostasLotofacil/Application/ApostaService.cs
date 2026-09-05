@@ -17,6 +17,11 @@ namespace GeradorApostasLotofacil.Application
             await _repo.Salvar(aposta);
         }
 
+        public async Task<bool> ExisteApostaDuplicada(int usuarioId, DateTime? dataApuracao, List<List<int>> jogos)
+        {
+            return await _repo.ExisteApostaDuplicada(usuarioId, dataApuracao, jogos);
+        }
+
         public async Task<List<ApostaModel>> ListarApostas(int usuarioId)
         {
             return await _repo.ObterTodasPorId(usuarioId);

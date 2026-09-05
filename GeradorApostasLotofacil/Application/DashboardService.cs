@@ -146,6 +146,14 @@ namespace GeradorApostasLotofacil.Application
                 // Número da sorte: número mais usado pelo usuário
                 dashboard.NumeroSorte = todosNumeros.Count > 0 ? todosNumeros[0].Numero : 0;
 
+                // Quantidade de jogos feitos por dia (com base na data de inclusão da aposta)
+                dashboard.JogosPorDia = apostasUsuario
+                    .SelectMany(a => a.Jogos.Select(_ => a.DataInclusao.Date))
+                    .GroupBy(dia => dia)
+                    .Select(g => (Dia: g.Key, Quantidade: g.Count()))
+                    .OrderBy(x => x.Dia)
+                    .ToList();
+
                 return dashboard;
 
             }

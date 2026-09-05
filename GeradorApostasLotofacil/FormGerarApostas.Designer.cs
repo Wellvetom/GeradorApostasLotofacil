@@ -22,8 +22,6 @@ namespace GeradorApostasLotofacil
             panelTop = new Panel();
             label_gerarAposta = new Label();
             numberBox_quantidadeApostas = new NumericUpDown();
-            label_apostasIneditas = new Label();
-            radioBtn_apostasIneditas = new RadioButton();
             label_maisSorteados = new Label();
             numMaisSorteados = new NumericUpDown();
             label_menosSorteados = new Label();
@@ -59,8 +57,6 @@ namespace GeradorApostasLotofacil
             panelTop.BackColor = Color.FromArgb(37, 38, 54);
             panelTop.Controls.Add(label_gerarAposta);
             panelTop.Controls.Add(numberBox_quantidadeApostas);
-            panelTop.Controls.Add(label_apostasIneditas);
-            panelTop.Controls.Add(radioBtn_apostasIneditas);
             panelTop.Controls.Add(label_maisSorteados);
             panelTop.Controls.Add(numMaisSorteados);
             panelTop.Controls.Add(label_menosSorteados);
@@ -96,25 +92,6 @@ namespace GeradorApostasLotofacil
             numberBox_quantidadeApostas.Maximum = 100;
             numberBox_quantidadeApostas.Value = 5;
             numberBox_quantidadeApostas.TextAlign = HorizontalAlignment.Center;
-            // 
-            // label_apostasIneditas
-            // 
-            label_apostasIneditas.AutoSize = true;
-            label_apostasIneditas.Font = new Font("Segoe UI", 10F);
-            label_apostasIneditas.ForeColor = Color.FromArgb(180, 180, 200);
-            label_apostasIneditas.Location = new Point(135, 65);
-            label_apostasIneditas.Name = "label_apostasIneditas";
-            label_apostasIneditas.Text = "Apenas inéditas:";
-            // 
-            // radioBtn_apostasIneditas
-            // 
-            radioBtn_apostasIneditas.AutoSize = true;
-            radioBtn_apostasIneditas.ForeColor = Color.White;
-            radioBtn_apostasIneditas.Location = new Point(270, 66);
-            radioBtn_apostasIneditas.Name = "radioBtn_apostasIneditas";
-            radioBtn_apostasIneditas.Size = new Size(17, 16);
-            radioBtn_apostasIneditas.TabStop = true;
-            radioBtn_apostasIneditas.UseVisualStyleBackColor = true;
             // 
             // label_maisSorteados
             // 
@@ -360,8 +337,6 @@ namespace GeradorApostasLotofacil
         private Label label_gerarAposta;
         private Button btn_gerarApostas;
         private NumericUpDown numberBox_quantidadeApostas;
-        private Label label_apostasIneditas;
-        private RadioButton radioBtn_apostasIneditas;
         private Label label_maisSorteados;
         private NumericUpDown numMaisSorteados;
         private Label label_menosSorteados;

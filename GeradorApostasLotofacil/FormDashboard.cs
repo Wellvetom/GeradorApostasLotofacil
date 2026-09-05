@@ -63,6 +63,7 @@ namespace GeradorApostasLotofacil
                 PreencherUltimosJogos();
                 PreencherAderencia();
                 panelGraficoAcertos.Invalidate();
+                panelJogosPorDia.Invalidate();
 
                 _loadingPanel.Ocultar();
             }
@@ -237,6 +238,76 @@ namespace GeradorApostasLotofacil
                     new PointF(x + barWidth / 2 - 8, padding + chartHeight + 3));
 
                 x += barWidth + spacing;
+            }
+        }
+
+        private void panelJogosPorDia_Paint(object sender, PaintEventArgs e)
+        {
+            var g = e.Graphics;
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+
+            // Título
+            g.DrawString("📅 Jogos por Dia",
+                new Font("Segoe UI", 10F, FontStyle.Bold), Brushes.White,
+                new PointF(15, 8));
+
+            if (_dados == null || _dados.JogosPorDia.Count == 0)
+            {
+                g.DrawString("Sem jogos registrados para exibir",
+                    new Font("Segoe UI", 10F), Brushes.White,
+                    new PointF(15, panelJogosPorDia.Height / 2 - 10));
+                return;
+            }
+
+            // Exibe os últimos 15 dias com jogos (mantém o gráfico legível)
+            var dados = _dados.JogosPorDia
+                .OrderBy(d => d.Dia)
+                .TakeLast(15)
+                .ToList();
+
+            int padding = 40;
+            int topOffset = 40;
+            int chartHeight = panelJogosPorDia.Height - padding - topOffset;
+            int chartWidth = panelJogosPorDia.Width - padding * 2;
+            int maxValue = dados.Max(d => d.Quantidade);
+
+            // Eixos
+            var penAxis = new Pen(Color.FromArgb(150, 255, 255, 255), 1);
+            g.DrawLine(penAxis, padding, topOffset, padding, topOffset + chartHeight);
+            g.DrawLine(penAxis, padding, topOffset + chartHeight, padding + chartWidth, topOffset + chartHeight);
+
+            int n = dados.Count;
+            int slot = chartWidth / n;
+            int barWidth = Math.Min(50, Math.Max(12, slot - 12));
+
+            var corBarra = Color.FromArgb(0, 150, 136);
+            var fontLabel = new Font("Segoe UI", 8F);
+            var fontValor = new Font("Segoe UI", 8F, FontStyle.Bold);
+
+            for (int i = 0; i < n; i++)
+            {
+                var (dia, quantidade) = dados[i];
+
+                int barHeight = maxValue > 0
+                    ? (int)((double)quantidade / maxValue * (chartHeight - 25))
+                    : 0;
+
+                int x = padding + i * slot + (slot - barWidth) / 2;
+                int y = topOffset + (chartHeight - barHeight);
+
+                using (var brush = new SolidBrush(corBarra))
+                    g.FillRectangle(brush, x, y, barWidth, barHeight);
+
+                // Valor acima da barra
+                g.DrawString(quantidade.ToString(), fontValor, Brushes.White,
+                    new PointF(x + barWidth / 2f - 6, y - 16));
+
+                // Data abaixo (dd/MM) rotacionada para caber
+                var state = g.Save();
+                g.TranslateTransform(x + barWidth / 2f, topOffset + chartHeight + 5);
+                g.RotateTransform(35);
+                g.DrawString(dia.ToString("dd/MM"), fontLabel, Brushes.White, new PointF(0, 0));
+                g.Restore(state);
             }
         }
     }

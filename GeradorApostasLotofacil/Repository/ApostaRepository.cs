@@ -1,4 +1,5 @@
 using GeradorApostasLotofacil.Domain;
+using GeradorApostasLotofacil.Helper;
 using GeradorApostasLotofacil.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +18,41 @@ namespace GeradorApostasLotofacil.Repository
         {
             _context.Apostas.Add(aposta);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<bool> ExisteApostaDuplicada(int usuarioId, DateTime? dataApuracao, List<List<int>> jogos)
+        {
+            // Assinatura do lote atual: conjunto (sem ordem) dos hashes de cada jogo.
+            var assinaturaNova = jogos
+                .Select(j => JogoHelper.GerarHashJogo(j))
+                .OrderBy(h => h)
+                .ToList();
+
+            // Apostas ativas do mesmo usuário para o mesmo sorteio (mesma data de apuração).
+            var query = _context.Apostas
+                .Where(a => a.UsuarioId == usuarioId && a.DataExclusao == null);
+
+            query = dataApuracao.HasValue
+                ? query.Where(a => a.DataApuracao == dataApuracao)
+                : query.Where(a => a.DataApuracao == null);
+
+            var candidatas = await query
+                .Include(a => a.Jogos)
+                .ToListAsync();
+
+            foreach (var aposta in candidatas)
+            {
+                var assinaturaExistente = aposta.Jogos
+                    .Select(j => JogoHelper.GerarHashJogo(j.Numeros))
+                    .OrderBy(h => h)
+                    .ToList();
+
+                // Mesmo conjunto de jogos (mesma quantidade e mesmos hashes) = duplicata.
+                if (assinaturaExistente.SequenceEqual(assinaturaNova))
+                    return true;
+            }
+
+            return false;
         }
 
         public async Task<ApostaModel?> ObterUltima()
