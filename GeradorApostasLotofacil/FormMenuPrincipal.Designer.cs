@@ -41,6 +41,7 @@ namespace GeradorApostasLotofacil
             btn_DashboardAdmin = new Button();
             btn_ImportarApostas = new Button();
             btn_FormListarApostas = new Button();
+            btn_FormVerificarAposta = new Button();
             btn_FormIncluirAposta = new Button();
             btnFormLoginCadastro = new Button();
             panel_principal.SuspendLayout();
@@ -142,6 +143,7 @@ namespace GeradorApostasLotofacil
             panel_menu.Controls.Add(btn_Dashboard);
             panel_menu.Controls.Add(btn_ImportarApostas);
             panel_menu.Controls.Add(linklogoff);
+            panel_menu.Controls.Add(btn_FormVerificarAposta);
             panel_menu.Controls.Add(btn_FormListarApostas);
             panel_menu.Controls.Add(btn_FormIncluirAposta);
             panel_menu.Controls.Add(btnFormLoginCadastro);
@@ -211,6 +213,26 @@ namespace GeradorApostasLotofacil
             btn_FormListarApostas.BackColor = Color.FromArgb(25, 27, 40);
             btn_FormListarApostas.Click += btn_FormListarApostas_Click;
             // 
+            // btn_FormVerificarAposta
+            // 
+            btn_FormVerificarAposta.Dock = DockStyle.Top;
+            btn_FormVerificarAposta.FlatAppearance.BorderSize = 0;
+            btn_FormVerificarAposta.FlatAppearance.MouseDownBackColor = Color.FromArgb(63, 81, 181);
+            btn_FormVerificarAposta.FlatAppearance.MouseOverBackColor = Color.FromArgb(40, 44, 62);
+            btn_FormVerificarAposta.FlatStyle = FlatStyle.Flat;
+            btn_FormVerificarAposta.Font = new Font("Segoe UI", 11F);
+            btn_FormVerificarAposta.ForeColor = Color.FromArgb(210, 210, 230);
+            btn_FormVerificarAposta.Location = new Point(0, 165);
+            btn_FormVerificarAposta.Name = "btn_FormVerificarAposta";
+            btn_FormVerificarAposta.Padding = new Padding(15, 0, 0, 0);
+            btn_FormVerificarAposta.Size = new Size(240, 55);
+            btn_FormVerificarAposta.TabIndex = 3;
+            btn_FormVerificarAposta.Text = "🔎  Verificar Aposta";
+            btn_FormVerificarAposta.TextAlign = ContentAlignment.MiddleLeft;
+            btn_FormVerificarAposta.UseVisualStyleBackColor = false;
+            btn_FormVerificarAposta.BackColor = Color.FromArgb(25, 27, 40);
+            btn_FormVerificarAposta.Click += btn_FormVerificarAposta_Click;
+            // 
             // btn_ImportarApostas
             // 
             btn_ImportarApostas.Dock = DockStyle.Top;
@@ -220,7 +242,7 @@ namespace GeradorApostasLotofacil
             btn_ImportarApostas.FlatStyle = FlatStyle.Flat;
             btn_ImportarApostas.Font = new Font("Segoe UI", 11F);
             btn_ImportarApostas.ForeColor = Color.FromArgb(210, 210, 230);
-            btn_ImportarApostas.Location = new Point(0, 165);
+            btn_ImportarApostas.Location = new Point(0, 220);
             btn_ImportarApostas.Name = "btn_ImportarApostas";
             btn_ImportarApostas.Padding = new Padding(15, 0, 0, 0);
             btn_ImportarApostas.Size = new Size(240, 55);
@@ -240,7 +262,7 @@ namespace GeradorApostasLotofacil
             btn_Dashboard.FlatStyle = FlatStyle.Flat;
             btn_Dashboard.Font = new Font("Segoe UI", 11F);
             btn_Dashboard.ForeColor = Color.FromArgb(210, 210, 230);
-            btn_Dashboard.Location = new Point(0, 220);
+            btn_Dashboard.Location = new Point(0, 275);
             btn_Dashboard.Name = "btn_Dashboard";
             btn_Dashboard.Padding = new Padding(15, 0, 0, 0);
             btn_Dashboard.Size = new Size(240, 55);
@@ -260,7 +282,7 @@ namespace GeradorApostasLotofacil
             btn_DashboardAdmin.FlatStyle = FlatStyle.Flat;
             btn_DashboardAdmin.Font = new Font("Segoe UI", 11F);
             btn_DashboardAdmin.ForeColor = Color.FromArgb(255, 180, 180);
-            btn_DashboardAdmin.Location = new Point(0, 275);
+            btn_DashboardAdmin.Location = new Point(0, 330);
             btn_DashboardAdmin.Name = "btn_DashboardAdmin";
             btn_DashboardAdmin.Padding = new Padding(15, 0, 0, 0);
             btn_DashboardAdmin.Size = new Size(240, 55);
@@ -314,6 +336,7 @@ namespace GeradorApostasLotofacil
         private Label label1;
         private Panel panel_menu;
         private Button btn_FormListarApostas;
+        private Button btn_FormVerificarAposta;
         private Button btn_FormIncluirAposta;
         private Panel panel_formularios;
         private Button btn_restaurar;

@@ -28,6 +28,7 @@ namespace GeradorApostasLotofacil
             btn_restaurar.Visible = false;
             btn_FormIncluirAposta.Visible = false;
             btn_FormListarApostas.Visible = false;
+            btn_FormVerificarAposta.Visible = false;
             btn_ImportarApostas.Visible = false;
             btn_Dashboard.Visible = false;
             btn_DashboardAdmin.Visible = false;
@@ -79,6 +80,7 @@ namespace GeradorApostasLotofacil
                 btnFormLoginCadastro.Enabled = false;
                 btn_FormIncluirAposta.Visible = true;
                 btn_FormListarApostas.Visible = true;
+                btn_FormVerificarAposta.Visible = true;
                 btn_Dashboard.Visible = true;
                 if (usuario.Perfil.Equals("Administrador") || usuario.Perfil.Equals("Admin"))
                 {
@@ -113,6 +115,7 @@ namespace GeradorApostasLotofacil
             linklogoff.Visible = false;
             btn_FormIncluirAposta.Visible = false;
             btn_FormListarApostas.Visible = false;
+            btn_FormVerificarAposta.Visible = false;
             btn_ImportarApostas.Visible = false;
             btn_Dashboard.Visible = false;
             btn_DashboardAdmin.Visible = false;
@@ -122,6 +125,11 @@ namespace GeradorApostasLotofacil
         private void btn_FormListarApostas_Click(object sender, EventArgs e)
         {
             _navigationService.NavegarPara<FormListarApostas>();
+        }
+
+        private void btn_FormVerificarAposta_Click(object sender, EventArgs e)
+        {
+            _navigationService.NavegarPara<FormVerificarAposta>();
         }
 
         private void btn_ImportarApostas_Click(object sender, EventArgs e)
