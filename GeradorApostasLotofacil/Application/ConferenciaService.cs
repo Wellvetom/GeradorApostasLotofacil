@@ -70,6 +70,15 @@ namespace GeradorApostasLotofacil.Application
                     .ToList();
 
                 int acertos = acertados.Count;
+
+                // Acompanha o melhor resultado entre TODOS os sorteios (mesmo abaixo de 12).
+                if (acertos > resultado.MelhorAcerto)
+                {
+                    resultado.MelhorAcerto = acertos;
+                    resultado.MelhorConcurso = sorteio.NuSorteio;
+                    resultado.MelhorData = sorteio.DataApuracao;
+                }
+
                 if (acertos < 12) continue;
 
                 var resumo = new SorteioAcertoResumo

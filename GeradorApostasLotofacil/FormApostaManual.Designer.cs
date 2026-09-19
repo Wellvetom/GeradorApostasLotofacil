@@ -1,6 +1,6 @@
 namespace GeradorApostasLotofacil
 {
-    partial class FormVerificarAposta
+    partial class FormApostaManual
     {
         private System.ComponentModel.IContainer components = null;
 
@@ -22,7 +22,9 @@ namespace GeradorApostasLotofacil
             lblInstrucao = new Label();
             flowNumeros = new FlowLayoutPanel();
             btnVerificar = new Button();
+            btnGravar = new Button();
             btnLimpar = new Button();
+            btnGerarAuto = new Button();
             panelResultado = new Panel();
             panelCards = new Panel();
             cardJaApostou = new Panel();
@@ -53,6 +55,8 @@ namespace GeradorApostasLotofacil
             // 
             panelTop.BackColor = Color.FromArgb(37, 38, 54);
             panelTop.Controls.Add(btnLimpar);
+            panelTop.Controls.Add(btnGerarAuto);
+            panelTop.Controls.Add(btnGravar);
             panelTop.Controls.Add(btnVerificar);
             panelTop.Controls.Add(flowNumeros);
             panelTop.Controls.Add(lblInstrucao);
@@ -61,7 +65,7 @@ namespace GeradorApostasLotofacil
             panelTop.Location = new Point(0, 0);
             panelTop.Name = "panelTop";
             panelTop.Padding = new Padding(15);
-            panelTop.Size = new Size(1060, 260);
+            panelTop.Size = new Size(1060, 270);
             // 
             // lblTitulo
             // 
@@ -70,7 +74,7 @@ namespace GeradorApostasLotofacil
             lblTitulo.ForeColor = Color.White;
             lblTitulo.Location = new Point(18, 12);
             lblTitulo.Name = "lblTitulo";
-            lblTitulo.Text = "🔎 Verificar Aposta";
+            lblTitulo.Text = "✍️ Criar Aposta Manualmente";
             // 
             // lblInstrucao
             // 
@@ -79,7 +83,7 @@ namespace GeradorApostasLotofacil
             lblInstrucao.ForeColor = Color.FromArgb(180, 180, 200);
             lblInstrucao.Location = new Point(20, 48);
             lblInstrucao.Name = "lblInstrucao";
-            lblInstrucao.Text = "Selecione 15 números (1 a 25) e clique em Verificar.  Selecionados: 0/15";
+            lblInstrucao.Text = "Selecione 15 números (1 a 25).  Selecionados: 0/15";
             // 
             // flowNumeros
             // 
@@ -95,13 +99,28 @@ namespace GeradorApostasLotofacil
             btnVerificar.FlatStyle = FlatStyle.Flat;
             btnVerificar.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnVerificar.ForeColor = Color.White;
-            btnVerificar.Location = new Point(770, 90);
+            btnVerificar.Location = new Point(770, 85);
             btnVerificar.Name = "btnVerificar";
             btnVerificar.Size = new Size(145, 40);
             btnVerificar.Text = "🔎 Verificar";
             btnVerificar.Cursor = Cursors.Hand;
             btnVerificar.UseVisualStyleBackColor = false;
             btnVerificar.Click += btnVerificar_Click;
+            // 
+            // btnGravar
+            // 
+            btnGravar.BackColor = Color.FromArgb(0, 150, 136);
+            btnGravar.FlatAppearance.BorderSize = 0;
+            btnGravar.FlatStyle = FlatStyle.Flat;
+            btnGravar.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnGravar.ForeColor = Color.White;
+            btnGravar.Location = new Point(770, 131);
+            btnGravar.Name = "btnGravar";
+            btnGravar.Size = new Size(145, 40);
+            btnGravar.Text = "💾 Gravar";
+            btnGravar.Cursor = Cursors.Hand;
+            btnGravar.UseVisualStyleBackColor = false;
+            btnGravar.Click += btnGravar_Click;
             // 
             // btnLimpar
             // 
@@ -110,13 +129,28 @@ namespace GeradorApostasLotofacil
             btnLimpar.FlatStyle = FlatStyle.Flat;
             btnLimpar.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
             btnLimpar.ForeColor = Color.White;
-            btnLimpar.Location = new Point(770, 135);
+            btnLimpar.Location = new Point(770, 177);
             btnLimpar.Name = "btnLimpar";
             btnLimpar.Size = new Size(145, 34);
             btnLimpar.Text = "🧹 Limpar";
             btnLimpar.Cursor = Cursors.Hand;
             btnLimpar.UseVisualStyleBackColor = false;
             btnLimpar.Click += btnLimpar_Click;
+            // 
+            // btnGerarAuto
+            // 
+            btnGerarAuto.BackColor = Color.FromArgb(120, 80, 200);
+            btnGerarAuto.FlatAppearance.BorderSize = 0;
+            btnGerarAuto.FlatStyle = FlatStyle.Flat;
+            btnGerarAuto.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnGerarAuto.ForeColor = Color.White;
+            btnGerarAuto.Location = new Point(770, 44);
+            btnGerarAuto.Name = "btnGerarAuto";
+            btnGerarAuto.Size = new Size(145, 34);
+            btnGerarAuto.Text = "🎲 Gerar auto";
+            btnGerarAuto.Cursor = Cursors.Hand;
+            btnGerarAuto.UseVisualStyleBackColor = false;
+            btnGerarAuto.Click += btnGerarAuto_Click;
             // 
             // panelResultado
             // 
@@ -125,10 +159,10 @@ namespace GeradorApostasLotofacil
             panelResultado.Controls.Add(lblTituloSorteios);
             panelResultado.Controls.Add(panelCards);
             panelResultado.Dock = DockStyle.Fill;
-            panelResultado.Location = new Point(0, 260);
+            panelResultado.Location = new Point(0, 270);
             panelResultado.Name = "panelResultado";
             panelResultado.Padding = new Padding(15);
-            panelResultado.Size = new Size(1060, 420);
+            panelResultado.Size = new Size(1060, 410);
             // 
             // panelCards
             // 
@@ -293,16 +327,16 @@ namespace GeradorApostasLotofacil
             colNumeros.Name = "colNumeros";
             colNumeros.FillWeight = 220;
             // 
-            // FormVerificarAposta
+            // FormApostaManual
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(30, 30, 46);
-            ClientSize = new Size(1060, 600);
+            ClientSize = new Size(1060, 680);
             Controls.Add(panelResultado);
             Controls.Add(panelTop);
-            Name = "FormVerificarAposta";
-            Text = "Verificar Aposta";
+            Name = "FormApostaManual";
+            Text = "Criar Aposta Manualmente";
             panelTop.ResumeLayout(false);
             panelTop.PerformLayout();
             panelResultado.ResumeLayout(false);
@@ -321,7 +355,9 @@ namespace GeradorApostasLotofacil
         private Label lblInstrucao;
         private FlowLayoutPanel flowNumeros;
         private Button btnVerificar;
+        private Button btnGravar;
         private Button btnLimpar;
+        private Button btnGerarAuto;
         private Panel panelResultado;
         private Panel panelCards;
         private Panel cardJaApostou;

@@ -29,6 +29,7 @@ namespace GeradorApostasLotofacil
             label_aleatorios = new Label();
             btn_gerarApostas = new Button();
             btnGravarApostas = new Button();
+            btnCriarManual = new Button();
             dgv_listaApostas = new DataGridView();
             PrimeiroNumero = new DataGridViewTextBoxColumn();
             SegundoNumero = new DataGridViewTextBoxColumn();
@@ -64,6 +65,7 @@ namespace GeradorApostasLotofacil
             panelTop.Controls.Add(label_aleatorios);
             panelTop.Controls.Add(btn_gerarApostas);
             panelTop.Controls.Add(btnGravarApostas);
+            panelTop.Controls.Add(btnCriarManual);
             panelTop.Dock = DockStyle.Top;
             panelTop.Location = new Point(0, 0);
             panelTop.Name = "panelTop";
@@ -179,6 +181,21 @@ namespace GeradorApostasLotofacil
             btnGravarApostas.Text = "💾 Gravar";
             btnGravarApostas.Cursor = Cursors.Hand;
             btnGravarApostas.Click += btnGravarApostas_Click;
+            // 
+            // btnCriarManual
+            // 
+            btnCriarManual.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnCriarManual.BackColor = Color.FromArgb(120, 80, 200);
+            btnCriarManual.FlatAppearance.BorderSize = 0;
+            btnCriarManual.FlatStyle = FlatStyle.Flat;
+            btnCriarManual.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnCriarManual.ForeColor = Color.White;
+            btnCriarManual.Location = new Point(620, 60);
+            btnCriarManual.Name = "btnCriarManual";
+            btnCriarManual.Size = new Size(298, 38);
+            btnCriarManual.Text = "✍️ Criar manualmente";
+            btnCriarManual.Cursor = Cursors.Hand;
+            btnCriarManual.Click += btnCriarManual_Click;
             // 
             // dgv_listaApostas
             // 
@@ -343,6 +360,7 @@ namespace GeradorApostasLotofacil
         private NumericUpDown numMenosSorteados;
         private Label label_aleatorios;
         private Button btnGravarApostas;
+        private Button btnCriarManual;
         private DataGridViewTextBoxColumn PrimeiroNumero;
         private DataGridViewTextBoxColumn SegundoNumero;
         private DataGridViewTextBoxColumn TerceiroNumero;

@@ -7,16 +7,19 @@ namespace GeradorApostasLotofacil
     public partial class FormDashboard : Form
     {
         private readonly IDashboardService _dashboardService;
+        private readonly IConferenciaService _conferenciaService;
         private readonly UsuarioSession _usuarioSession;
         private DashboardViewModel? _dados;
         private readonly LoadingPanel _loadingPanel;
 
         public FormDashboard(
             IDashboardService dashboardService,
+            IConferenciaService conferenciaService,
             UsuarioSession usuarioSession)
         {
             InitializeComponent();
             _dashboardService = dashboardService;
+            _conferenciaService = conferenciaService;
             _usuarioSession = usuarioSession;
 
             _loadingPanel = new LoadingPanel();
@@ -62,6 +65,7 @@ namespace GeradorApostasLotofacil
                 PreencherNumerosFrequentes();
                 PreencherUltimosJogos();
                 PreencherAderencia();
+                PreencherComboJogos();
                 panelGraficoAcertos.Invalidate();
                 panelJogosPorDia.Invalidate();
 
@@ -144,6 +148,138 @@ namespace GeradorApostasLotofacil
                     $"Erro ao preencher últimos jogos.\n\nErro: {ex.Message}",
                     "Erro - PreencherUltimosJogos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
+        }
+
+        /// <summary>Item do ComboBox que carrega o jogo do usuário selecionado.</summary>
+        private sealed class JogoComboItem
+        {
+            public DashboardJogoResumo Jogo { get; init; } = null!;
+            public string Texto { get; init; } = string.Empty;
+            public override string ToString() => Texto;
+        }
+
+        private void PreencherComboJogos()
+        {
+            try
+            {
+                cmbJogos.Items.Clear();
+                lblResultadoVerificacao.Text = "—";
+                lblResultadoVerificacao.ForeColor = Color.FromArgb(210, 210, 230);
+                dgvVerificacaoSorteios.DataSource = null;
+
+                if (_dados == null || _dados.TodosOsJogos.Count == 0)
+                {
+                    btnVerificarJogo.Enabled = false;
+                    cmbJogos.Enabled = false;
+                    lblResultadoVerificacao.Text = "Você ainda não tem jogos criados.";
+                    return;
+                }
+
+                foreach (var jogo in _dados.TodosOsJogos)
+                {
+                    var numeros = string.Join(" - ", jogo.Numeros.OrderBy(n => n).Select(n => n.ToString("D2")));
+                    var texto = $"{jogo.DataAposta:dd/MM/yyyy}  |  {numeros}";
+                    cmbJogos.Items.Add(new JogoComboItem { Jogo = jogo, Texto = texto });
+                }
+
+                cmbJogos.Enabled = true;
+                btnVerificarJogo.Enabled = true;
+                if (cmbJogos.Items.Count > 0)
+                    cmbJogos.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Erro ao preencher lista de jogos.\n\nErro: {ex.Message}",
+                    "Erro - PreencherComboJogos", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private async void btnVerificarJogo_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!_usuarioSession.EstaAutenticado || _usuarioSession.UsuarioLogado == null)
+                {
+                    MessageBox.Show("Sessão expirada. Faça login novamente.", "Aviso",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                if (cmbJogos.SelectedItem is not JogoComboItem item)
+                {
+                    MessageBox.Show("Selecione um jogo para verificar.", "Seleção necessária",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                var numeros = item.Jogo.Numeros.Distinct().OrderBy(n => n).ToList();
+                if (numeros.Count != 15)
+                {
+                    MessageBox.Show(
+                        $"O jogo selecionado possui {numeros.Count} números. A verificação requer 15 números.",
+                        "Jogo inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                _loadingPanel.Exibir("Verificando jogo...");
+
+                var resultado = await Task.Run(async () =>
+                    await _conferenciaService.VerificarAposta(_usuarioSession.UsuarioLogado.Id, numeros));
+
+                PreencherResultadoVerificacao(resultado);
+
+                _loadingPanel.Ocultar();
+            }
+            catch (Exception ex)
+            {
+                _loadingPanel.Ocultar();
+                MessageBox.Show($"Erro ao verificar jogo: {ex.Message}", "Erro",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void PreencherResultadoVerificacao(VerificacaoApostaViewModel r)
+        {
+            // Resumo textual por faixa de acertos.
+            if (r.JaFoiSorteado)
+            {
+                lblResultadoVerificacao.ForeColor = Color.FromArgb(255, 200, 100);
+                lblResultadoVerificacao.Text =
+                    $"🏆 Já foi sorteado!\n15: {r.Sorteios15.Count} | 14: {r.Sorteios14.Count} | " +
+                    $"13: {r.Sorteios13.Count} | 12: {r.Sorteios12.Count}";
+            }
+            else if (r.MelhorAcerto < 0)
+            {
+                lblResultadoVerificacao.ForeColor = Color.FromArgb(210, 210, 230);
+                lblResultadoVerificacao.Text = "Sem sorteios oficiais importados para comparar.";
+            }
+            else
+            {
+                lblResultadoVerificacao.ForeColor = Color.FromArgb(210, 210, 230);
+                var data = r.MelhorData?.ToString("dd/MM/yyyy");
+                var origem = r.MelhorConcurso > 0 ? $"concurso {r.MelhorConcurso}" : "sorteio";
+                var complemento = data != null ? $" ({origem} — {data})" : "";
+                lblResultadoVerificacao.Text =
+                    $"❌ Nunca saiu com 12+.\nMelhor: {r.MelhorAcerto} acertos{complemento}";
+            }
+
+            // Grid: sorteios com 12+ acertos ordenados por faixa (15→12) e data.
+            var linhas = r.Sorteios15
+                .Concat(r.Sorteios14)
+                .Concat(r.Sorteios13)
+                .Concat(r.Sorteios12)
+                .Select(s => new
+                {
+                    Acertos = $"{s.Acertos}",
+                    Concurso = s.NuSorteio > 0 ? s.NuSorteio.ToString() : "—",
+                    Data = s.DataApuracao?.ToString("dd/MM/yyyy") ?? "—",
+                    Números = string.Join(" - ", s.NumerosAcertados.Select(n => n.ToString("D2")))
+                })
+                .ToList();
+
+            dgvVerificacaoSorteios.DataSource = linhas;
+            dgvVerificacaoSorteios.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
 
         private void PreencherAderencia()

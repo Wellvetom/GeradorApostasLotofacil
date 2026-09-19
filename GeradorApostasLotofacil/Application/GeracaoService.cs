@@ -130,5 +130,90 @@ namespace GeradorApostasLotofacil.Application
 
             return aposta;
         }
+
+        public List<int> GerarJogoComCriterio(int acertosAlvo, int minSorteios)
+        {
+            if (acertosAlvo < 11 || acertosAlvo > 14)
+                throw new ArgumentOutOfRangeException(nameof(acertosAlvo),
+                    "O alvo de acertos deve ser 11, 12, 13 ou 14.");
+
+            if (minSorteios < 1)
+                throw new ArgumentOutOfRangeException(nameof(minSorteios),
+                    "A quantidade de sorteios deve ser pelo menos 1.");
+
+            var random = new Random();
+
+            // Conjuntos de números de cada sorteio oficial importado (UsuarioId == null).
+            var sorteiosOficiais = _context.Apostas
+                .Where(a => a.UsuarioId == null)
+                .Include(a => a.Jogos)
+                .AsEnumerable()
+                .SelectMany(a => a.Jogos)
+                .Select(j => j.Numeros.ToHashSet())
+                .Where(s => s.Count > 0)
+                .ToList();
+
+            if (sorteiosOficiais.Count == 0)
+                throw new InvalidOperationException(
+                    "Não há sorteios oficiais importados para basear a geração. Importe resultados primeiro.");
+
+            if (sorteiosOficiais.Count < minSorteios)
+                throw new InvalidOperationException(
+                    $"Existem apenas {sorteiosOficiais.Count} sorteios importados, " +
+                    $"menos que os {minSorteios} solicitados.");
+
+            // Hashes já existentes na base (jogos de usuários e sorteios) para garantir ineditismo.
+            var hashesExistentes = _context.Jogos
+                .AsEnumerable()
+                .Select(j => JogoHelper.GerarHashJogo(j.Numeros))
+                .ToHashSet();
+
+            var todosNumeros = Enumerable.Range(1, 25).ToList();
+
+            // Espaço de busca é grande; usamos tentativas aleatórias com um teto de segurança.
+            const int maxTentativas = 200_000;
+
+            for (int tentativa = 0; tentativa < maxTentativas; tentativa++)
+            {
+                // Sorteia 15 números distintos de 1 a 25.
+                var numerosJogo = todosNumeros
+                    .OrderBy(_ => random.Next())
+                    .Take(15)
+                    .OrderBy(n => n)
+                    .ToList();
+
+                var hash = JogoHelper.GerarHashJogo(numerosJogo);
+                if (hashesExistentes.Contains(hash))
+                    continue; // não é inédito
+
+                var conjunto = numerosJogo.ToHashSet();
+
+                // Conta em quantos sorteios oficiais a interseção atinge o alvo de acertos.
+                int sorteiosQueAtingem = 0;
+                foreach (var sorteio in sorteiosOficiais)
+                {
+                    int acertos = 0;
+                    foreach (var n in sorteio)
+                    {
+                        if (conjunto.Contains(n)) acertos++;
+                    }
+
+                    if (acertos >= acertosAlvo)
+                    {
+                        sorteiosQueAtingem++;
+                        if (sorteiosQueAtingem >= minSorteios)
+                            break;
+                    }
+                }
+
+                if (sorteiosQueAtingem >= minSorteios)
+                    return numerosJogo;
+            }
+
+            throw new InvalidOperationException(
+                $"Não foi possível gerar um jogo inédito com pelo menos {acertosAlvo} acertos " +
+                $"em {minSorteios} sorteio(s) após {maxTentativas:N0} tentativas. " +
+                "Tente reduzir o alvo de acertos ou a quantidade de sorteios.");
+        }
     }
 }

@@ -31,6 +31,24 @@ namespace GeradorApostasLotofacil.DTO
         public bool JaFoiSorteado =>
             Sorteios15.Count > 0 || Sorteios14.Count > 0 ||
             Sorteios13.Count > 0 || Sorteios12.Count > 0;
+
+        /// <summary>
+        /// Maior quantidade de acertos obtida entre todos os sorteios oficiais
+        /// (mesmo abaixo de 12). -1 quando não há sorteios oficiais para comparar.
+        /// </summary>
+        public int MelhorAcerto { get; set; } = -1;
+
+        /// <summary>Concurso do sorteio em que ocorreu o melhor acerto (0 se indefinido).</summary>
+        public int MelhorConcurso { get; set; }
+
+        /// <summary>Data de apuração do sorteio em que ocorreu o melhor acerto.</summary>
+        public DateTime? MelhorData { get; set; }
+
+        /// <summary>
+        /// Quantos dos números selecionados NÃO foram sorteados no melhor resultado.
+        /// Corresponde a (15 - MelhorAcerto). -1 quando não há sorteios para comparar.
+        /// </summary>
+        public int NaoSorteados => MelhorAcerto < 0 ? -1 : Numeros.Count - MelhorAcerto;
     }
 
     public class ApostaUsuarioResumo

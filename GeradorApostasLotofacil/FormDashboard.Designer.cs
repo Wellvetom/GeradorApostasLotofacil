@@ -38,6 +38,12 @@ namespace GeradorApostasLotofacil
             lblTituloNumeroSorte = new Label();
             panelGraficoAcertos = new Panel();
             panelJogosPorDia = new Panel();
+            panelVerificarJogo = new Panel();
+            lblTituloVerificarJogo = new Label();
+            cmbJogos = new ComboBox();
+            btnVerificarJogo = new Button();
+            lblResultadoVerificacao = new Label();
+            dgvVerificacaoSorteios = new DataGridView();
             panelInferior = new Panel();
             panelNumerosFrequentes = new Panel();
             lblTituloNumeros = new Label();
@@ -59,6 +65,8 @@ namespace GeradorApostasLotofacil
             cardTaxaAcerto.SuspendLayout();
             cardNumeroSorte.SuspendLayout();
             panelInferior.SuspendLayout();
+            panelVerificarJogo.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dgvVerificacaoSorteios).BeginInit();
             panelNumerosFrequentes.SuspendLayout();
             panelUltimasApostas.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dgvUltimasApostas).BeginInit();
@@ -293,6 +301,100 @@ namespace GeradorApostasLotofacil
             panelJogosPorDia.Paint += panelJogosPorDia_Paint;
 
             // 
+            // panelVerificarJogo
+            // 
+            panelVerificarJogo.BackColor = Color.FromArgb(45, 55, 72);
+            panelVerificarJogo.Controls.Add(dgvVerificacaoSorteios);
+            panelVerificarJogo.Controls.Add(lblResultadoVerificacao);
+            panelVerificarJogo.Controls.Add(btnVerificarJogo);
+            panelVerificarJogo.Controls.Add(cmbJogos);
+            panelVerificarJogo.Controls.Add(lblTituloVerificarJogo);
+            panelVerificarJogo.Dock = DockStyle.Top;
+            panelVerificarJogo.Location = new Point(0, 460);
+            panelVerificarJogo.Name = "panelVerificarJogo";
+            panelVerificarJogo.Padding = new Padding(15, 10, 15, 10);
+            panelVerificarJogo.Size = new Size(1050, 230);
+
+            // 
+            // lblTituloVerificarJogo
+            // 
+            lblTituloVerificarJogo.Dock = DockStyle.Top;
+            lblTituloVerificarJogo.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblTituloVerificarJogo.ForeColor = Color.White;
+            lblTituloVerificarJogo.Location = new Point(15, 10);
+            lblTituloVerificarJogo.Name = "lblTituloVerificarJogo";
+            lblTituloVerificarJogo.Padding = new Padding(5);
+            lblTituloVerificarJogo.Size = new Size(1020, 30);
+            lblTituloVerificarJogo.Text = "🔎 Verificar meu jogo — já foi sorteado? (12/13/14/15)";
+
+            // 
+            // cmbJogos
+            // 
+            cmbJogos.BackColor = Color.FromArgb(55, 65, 82);
+            cmbJogos.DropDownStyle = ComboBoxStyle.DropDownList;
+            cmbJogos.FlatStyle = FlatStyle.Flat;
+            cmbJogos.Font = new Font("Segoe UI", 10F);
+            cmbJogos.ForeColor = Color.White;
+            cmbJogos.Location = new Point(20, 50);
+            cmbJogos.Name = "cmbJogos";
+            cmbJogos.Size = new Size(620, 28);
+
+            // 
+            // btnVerificarJogo
+            // 
+            btnVerificarJogo.BackColor = Color.FromArgb(63, 81, 181);
+            btnVerificarJogo.FlatStyle = FlatStyle.Flat;
+            btnVerificarJogo.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btnVerificarJogo.ForeColor = Color.White;
+            btnVerificarJogo.Location = new Point(655, 49);
+            btnVerificarJogo.Name = "btnVerificarJogo";
+            btnVerificarJogo.Size = new Size(140, 30);
+            btnVerificarJogo.Text = "Verificar";
+            btnVerificarJogo.UseVisualStyleBackColor = false;
+            btnVerificarJogo.Cursor = Cursors.Hand;
+            btnVerificarJogo.FlatAppearance.BorderSize = 0;
+            btnVerificarJogo.Click += btnVerificarJogo_Click;
+
+            // 
+            // lblResultadoVerificacao
+            // 
+            lblResultadoVerificacao.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            lblResultadoVerificacao.ForeColor = Color.FromArgb(210, 210, 230);
+            lblResultadoVerificacao.Location = new Point(810, 50);
+            lblResultadoVerificacao.Name = "lblResultadoVerificacao";
+            lblResultadoVerificacao.Size = new Size(220, 60);
+            lblResultadoVerificacao.Text = "—";
+
+            // 
+            // dgvVerificacaoSorteios
+            // 
+            dgvVerificacaoSorteios.AllowUserToAddRows = false;
+            dgvVerificacaoSorteios.AllowUserToDeleteRows = false;
+            dgvVerificacaoSorteios.BackgroundColor = Color.FromArgb(55, 65, 82);
+            dgvVerificacaoSorteios.BorderStyle = BorderStyle.None;
+            dgvVerificacaoSorteios.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
+            {
+                BackColor = Color.FromArgb(63, 81, 181),
+                ForeColor = Color.White,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold)
+            };
+            dgvVerificacaoSorteios.DefaultCellStyle = new DataGridViewCellStyle
+            {
+                BackColor = Color.FromArgb(55, 65, 82),
+                ForeColor = Color.White,
+                SelectionBackColor = Color.FromArgb(75, 85, 102),
+                SelectionForeColor = Color.White
+            };
+            dgvVerificacaoSorteios.EnableHeadersVisualStyles = false;
+            dgvVerificacaoSorteios.GridColor = Color.FromArgb(70, 80, 95);
+            dgvVerificacaoSorteios.Location = new Point(20, 90);
+            dgvVerificacaoSorteios.Name = "dgvVerificacaoSorteios";
+            dgvVerificacaoSorteios.ReadOnly = true;
+            dgvVerificacaoSorteios.RowHeadersVisible = false;
+            dgvVerificacaoSorteios.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgvVerificacaoSorteios.Size = new Size(1010, 120);
+
+            // 
             // panelInferior
             // 
             panelInferior.Controls.Add(panelUltimasApostas);
@@ -429,7 +531,9 @@ namespace GeradorApostasLotofacil
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(30, 30, 46);
             ClientSize = new Size(1050, 780);
+            AutoScroll = true;
             Controls.Add(panelInferior);
+            Controls.Add(panelVerificarJogo);
             Controls.Add(panelJogosPorDia);
             Controls.Add(panelGraficoAcertos);
             Controls.Add(panelCards);
@@ -447,6 +551,8 @@ namespace GeradorApostasLotofacil
             cardTaxaAcerto.ResumeLayout(false);
             cardNumeroSorte.ResumeLayout(false);
             panelInferior.ResumeLayout(false);
+            panelVerificarJogo.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dgvVerificacaoSorteios).EndInit();
             panelNumerosFrequentes.ResumeLayout(false);
             panelUltimasApostas.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dgvUltimasApostas).EndInit();
@@ -478,6 +584,12 @@ namespace GeradorApostasLotofacil
         private Label lblTituloNumeroSorte;
         private Panel panelGraficoAcertos;
         private Panel panelJogosPorDia;
+        private Panel panelVerificarJogo;
+        private Label lblTituloVerificarJogo;
+        private ComboBox cmbJogos;
+        private Button btnVerificarJogo;
+        private Label lblResultadoVerificacao;
+        private DataGridView dgvVerificacaoSorteios;
         private Panel panelInferior;
         private Panel panelNumerosFrequentes;
         private Label lblTituloNumeros;

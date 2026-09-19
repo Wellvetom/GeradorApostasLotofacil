@@ -133,6 +133,9 @@ namespace GeradorApostasLotofacil.Application
                 // Últimos 10 jogos (já estão ordenados por data decrescente da aposta)
                 dashboard.UltimosJogos = ultimosJogosList.Take(10).ToList();
 
+                // Todos os jogos do usuário (para seleção/verificação individual no dashboard)
+                dashboard.TodosOsJogos = ultimosJogosList;
+
                 dashboard.DistribuicaoAcertos = distribuicao;
                 dashboard.MelhorAcerto = melhorAcertoGeral;
 

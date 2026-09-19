@@ -1,6 +1,7 @@
 using GeradorApostasLotofacil.Application;
 using GeradorApostasLotofacil.Domain;
 using GeradorApostasLotofacil.Session;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace GeradorApostasLotofacil
 {
@@ -9,21 +10,31 @@ namespace GeradorApostasLotofacil
         private readonly IGeracaoService _geracaoService;
         private readonly IApostaService _apostaService;
         private readonly UsuarioSession _usuarioSession;
+        private readonly IServiceProvider _serviceProvider;
         private List<JogoModel>? _jogosSalvos;
         private readonly LoadingPanel _loadingPanel;
 
         public FormGerarApostas(
             IGeracaoService geracaoService,
             IApostaService apostaService,
-            UsuarioSession usuarioSession)
+            UsuarioSession usuarioSession,
+            IServiceProvider serviceProvider)
         {
             InitializeComponent();
             _geracaoService = geracaoService;
             _apostaService = apostaService;
             _usuarioSession = usuarioSession;
+            _serviceProvider = serviceProvider;
 
             _loadingPanel = new LoadingPanel();
             this.Controls.Add(_loadingPanel);
+        }
+
+        private void btnCriarManual_Click(object sender, EventArgs e)
+        {
+            using var form = _serviceProvider.GetRequiredService<FormApostaManual>();
+            form.StartPosition = FormStartPosition.CenterParent;
+            form.ShowDialog(this);
         }
 
         private void btn_gerarApostas_Click(object sender, EventArgs e)

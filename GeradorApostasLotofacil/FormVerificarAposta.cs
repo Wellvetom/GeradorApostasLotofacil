@@ -182,6 +182,22 @@ namespace GeradorApostasLotofacil
                 lblJaSorteado.Text = "❌ Não — nunca saiu com 12 ou mais acertos.";
             }
 
+            // Card 3: melhor resultado (acertos × números não sorteados)
+            if (r.MelhorAcerto < 0)
+            {
+                lblMelhorResultado.ForeColor = Color.FromArgb(210, 210, 230);
+                lblMelhorResultado.Text = "❌ Não há sorteios oficiais importados para comparar.";
+            }
+            else
+            {
+                lblMelhorResultado.ForeColor = Color.FromArgb(255, 210, 140);
+                var origem = r.MelhorConcurso > 0 ? $"concurso {r.MelhorConcurso}" : "sorteio";
+                var data = r.MelhorData?.ToString("dd/MM/yyyy");
+                var complemento = data != null ? $" ({origem} — {data})" : $" ({origem})";
+                lblMelhorResultado.Text =
+                    $"🎯 {r.MelhorAcerto} acertos · {r.NaoSorteados} não sorteados{complemento}";
+            }
+
             // Grid: todos os sorteios com 12+ acertos, ordenados por faixa (15→12) e data.
             var linhas = r.Sorteios15
                 .Concat(r.Sorteios14)
@@ -211,6 +227,8 @@ namespace GeradorApostasLotofacil
             lblJaApostou.ForeColor = Color.White;
             lblJaSorteado.Text = "—";
             lblJaSorteado.ForeColor = Color.White;
+            lblMelhorResultado.Text = "—";
+            lblMelhorResultado.ForeColor = Color.White;
             dgvSorteios.DataSource = null;
         }
     }

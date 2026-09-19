@@ -46,6 +46,7 @@ namespace GeradorApostasLotofacil
             services.AddTransient<FormLogin>();
             services.AddTransient<FormCadastro>();
             services.AddTransient<FormGerarApostas>();
+            services.AddTransient<FormApostaManual>();
             services.AddTransient<FormListarApostas>();
             services.AddTransient<FormVerificarAposta>();
             services.AddTransient<FormImportarApostas>();
