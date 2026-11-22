@@ -1,4 +1,4 @@
-namespace GeradorApostasLotofacil
+﻿namespace GeradorApostasLotofacil
 {
     partial class FormDashboardAdmin
     {
@@ -220,6 +220,7 @@ namespace GeradorApostasLotofacil
             lblTituloUltimosSorteios.Size = new Size(500, 26);
             lblTituloUltimosSorteios.Text = "🏆 Últimos 10 Sorteios Oficiais";
             dgvUltimosSorteios.AllowUserToAddRows = false;
+            dgvUltimosSorteios.ScrollBars = ScrollBars.Both;
             dgvUltimosSorteios.AllowUserToDeleteRows = false;
             dgvUltimosSorteios.BackgroundColor = Color.FromArgb(55, 65, 82);
             dgvUltimosSorteios.BorderStyle = BorderStyle.None;
@@ -253,6 +254,7 @@ namespace GeradorApostasLotofacil
             lblTituloComum12.Size = new Size(338, 26);
             lblTituloComum12.Text = "🔗 Pares com 12 números em comum";
             dgvComum12.AllowUserToAddRows = false;
+            dgvComum12.ScrollBars = ScrollBars.Both;
             dgvComum12.AllowUserToDeleteRows = false;
             dgvComum12.BackgroundColor = Color.FromArgb(55, 65, 82);
             dgvComum12.BorderStyle = BorderStyle.None;
@@ -279,6 +281,7 @@ namespace GeradorApostasLotofacil
             lblTituloComum13.Size = new Size(338, 26);
             lblTituloComum13.Text = "🔗 Pares com 13 números em comum";
             dgvComum13.AllowUserToAddRows = false;
+            dgvComum13.ScrollBars = ScrollBars.Both;
             dgvComum13.AllowUserToDeleteRows = false;
             dgvComum13.BackgroundColor = Color.FromArgb(55, 65, 82);
             dgvComum13.BorderStyle = BorderStyle.None;
@@ -304,6 +307,7 @@ namespace GeradorApostasLotofacil
             lblTituloComum14.Size = new Size(338, 26);
             lblTituloComum14.Text = "🔗 Pares com 14 números em comum";
             dgvComum14.AllowUserToAddRows = false;
+            dgvComum14.ScrollBars = ScrollBars.Both;
             dgvComum14.AllowUserToDeleteRows = false;
             dgvComum14.BackgroundColor = Color.FromArgb(55, 65, 82);
             dgvComum14.BorderStyle = BorderStyle.None;

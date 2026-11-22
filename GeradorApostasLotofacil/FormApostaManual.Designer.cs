@@ -1,4 +1,4 @@
-namespace GeradorApostasLotofacil
+﻿namespace GeradorApostasLotofacil
 {
     partial class FormApostaManual
     {
@@ -265,6 +265,7 @@ namespace GeradorApostasLotofacil
             // dgvSorteios
             // 
             dgvSorteios.AllowUserToAddRows = false;
+            dgvSorteios.ScrollBars = ScrollBars.Both;
             dgvSorteios.AllowUserToDeleteRows = false;
             dgvSorteios.AllowUserToResizeRows = false;
             dgvSorteios.BackgroundColor = Color.FromArgb(40, 42, 58);

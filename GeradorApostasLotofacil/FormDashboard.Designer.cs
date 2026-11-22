@@ -1,4 +1,4 @@
-namespace GeradorApostasLotofacil
+﻿namespace GeradorApostasLotofacil
 {
     partial class FormDashboard
     {
@@ -369,6 +369,7 @@ namespace GeradorApostasLotofacil
             // dgvVerificacaoSorteios
             // 
             dgvVerificacaoSorteios.AllowUserToAddRows = false;
+            dgvVerificacaoSorteios.ScrollBars = ScrollBars.Both;
             dgvVerificacaoSorteios.AllowUserToDeleteRows = false;
             dgvVerificacaoSorteios.BackgroundColor = Color.FromArgb(55, 65, 82);
             dgvVerificacaoSorteios.BorderStyle = BorderStyle.None;
@@ -466,6 +467,7 @@ namespace GeradorApostasLotofacil
             // dgvUltimasApostas
             // 
             dgvUltimasApostas.AllowUserToAddRows = false;
+            dgvUltimasApostas.ScrollBars = ScrollBars.Both;
             dgvUltimasApostas.AllowUserToDeleteRows = false;
             dgvUltimasApostas.BackgroundColor = Color.FromArgb(55, 65, 82);
             dgvUltimasApostas.BorderStyle = BorderStyle.None;

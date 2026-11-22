@@ -1,4 +1,4 @@
-namespace GeradorApostasLotofacil
+﻿namespace GeradorApostasLotofacil
 {
     partial class FormImportarApostas
     {
@@ -128,7 +128,7 @@ namespace GeradorApostasLotofacil
             dgv_listaApostas.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgv_listaApostas.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgv_listaApostas.MultiSelect = false;
-            dgv_listaApostas.ScrollBars = ScrollBars.Vertical;
+            dgv_listaApostas.ScrollBars = ScrollBars.Both;
             // 
             // colData
             // 
