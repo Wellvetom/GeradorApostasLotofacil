@@ -1,4 +1,5 @@
 using GeradorApostasLotofacil.Application;
+using GeradorApostasLotofacil.Domain;
 using GeradorApostasLotofacil.Helper;
 using GeradorApostasLotofacil.Session;
 
@@ -8,18 +9,24 @@ namespace GeradorApostasLotofacil
     {
         private readonly IApostaService _apostaService;
         private readonly IImportacaoService _importacaoService;
+        private readonly ICaixaLoteriaClient _caixa;
         private readonly UsuarioSession _usuarioSession;
+        private readonly LoteriaConfig _config;
         private readonly LoadingPanel _loadingPanel;
 
         public FormImportarApostas(
             IApostaService apostaService,
             IImportacaoService importacaoService,
-            UsuarioSession usuarioSession)
+            ICaixaLoteriaClient caixa,
+            UsuarioSession usuarioSession,
+            LoteriaConfig config)
         {
             InitializeComponent();
             _apostaService = apostaService;
             _importacaoService = importacaoService;
+            _caixa = caixa;
             _usuarioSession = usuarioSession;
+            _config = config;
 
             _loadingPanel = new LoadingPanel();
             this.Controls.Add(_loadingPanel);
@@ -60,12 +67,14 @@ namespace GeradorApostasLotofacil
             {
                 _loadingPanel.Exibir("Carregando dados do sorteio...");
 
-                var retornoRobo = await new LoteriasCaixaRobot.Interface.BuscaSorteioInterface()
-                    .BuscaUltimoSorteio(LoteriasCaixaRobot.Request.BaseRequest.TipoSorteio.Lotofacil);
+                var ultimoSorteio = await _caixa.ObterUltimoAsync();
 
-                if (retornoRobo.ProcessOK)
+                if (ultimoSorteio != null && ultimoSorteio.NuSorteio > 0)
                 {
-                    label_dadosApostas.Text = $"Ultimo sorteio realizado em: {retornoRobo.DataUltimoSorteio.ToString("dd/MM/yyyy")}\nO proximo sorteio será realizado em: {retornoRobo.DataProximoSorteio.ToString("dd/MM/yyyy")} ";
+                    var proximo = ultimoSorteio.DataProximoSorteio?.ToString("dd/MM/yyyy") ?? "a definir";
+                    label_dadosApostas.Text =
+                        $"Último sorteio (nº {ultimoSorteio.NuSorteio}) realizado em: {ultimoSorteio.DataApuracao:dd/MM/yyyy}\n" +
+                        $"O próximo sorteio será realizado em: {proximo} ";
                 }
 
                 _loadingPanel.Ocultar();

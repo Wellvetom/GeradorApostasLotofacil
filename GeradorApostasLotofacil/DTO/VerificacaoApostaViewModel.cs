@@ -1,16 +1,16 @@
 namespace GeradorApostasLotofacil.DTO
 {
     /// <summary>
-    /// Resultado da verificação de uma aposta (15 números) informada pelo usuário.
+    /// Resultado da verificação de uma aposta informada pelo usuário.
     /// Indica se o usuário já apostou esses números e se eles já foram sorteados
-    /// oficialmente com 15, 14, 13 ou 12 acertos.
+    /// oficialmente, agrupados por faixa de acertos (dependente da modalidade).
     /// </summary>
     public class VerificacaoApostaViewModel
     {
         /// <summary>Números informados para verificação (ordenados).</summary>
         public List<int> Numeros { get; set; } = new();
 
-        /// <summary>Indica se o usuário já apostou exatamente esses 15 números.</summary>
+        /// <summary>Indica se o usuário já apostou exatamente esses números.</summary>
         public bool JaApostou => ApostasDoUsuario.Count > 0;
 
         /// <summary>
@@ -19,22 +19,31 @@ namespace GeradorApostasLotofacil.DTO
         public List<ApostaUsuarioResumo> ApostasDoUsuario { get; set; } = new();
 
         /// <summary>
-        /// Sorteios oficiais em que esses números tiveram interseção com o resultado,
-        /// agrupados por quantidade de acertos (15, 14, 13, 12).
+        /// Sorteios oficiais em que esses números tiveram interseção relevante com o resultado,
+        /// agrupados por quantidade de acertos. A chave é a faixa (ex.: 15,14,13,12 na Lotofácil;
+        /// 6,5,4 na Mega Sena).
         /// </summary>
-        public List<SorteioAcertoResumo> Sorteios15 { get; set; } = new();
-        public List<SorteioAcertoResumo> Sorteios14 { get; set; } = new();
-        public List<SorteioAcertoResumo> Sorteios13 { get; set; } = new();
-        public List<SorteioAcertoResumo> Sorteios12 { get; set; } = new();
+        public Dictionary<int, List<SorteioAcertoResumo>> SorteiosPorFaixa { get; set; } = new();
 
-        /// <summary>Indica se houve algum sorteio oficial com 12+ acertos.</summary>
-        public bool JaFoiSorteado =>
-            Sorteios15.Count > 0 || Sorteios14.Count > 0 ||
-            Sorteios13.Count > 0 || Sorteios12.Count > 0;
+        /// <summary>Obtém a lista de sorteios de uma faixa (vazia se não houver).</summary>
+        public List<SorteioAcertoResumo> ObterFaixa(int acertos) =>
+            SorteiosPorFaixa.TryGetValue(acertos, out var lista) ? lista : new List<SorteioAcertoResumo>();
+
+        // ---- Compatibilidade com telas da Lotofácil (faixas fixas 15..12) ----
+        public List<SorteioAcertoResumo> Sorteios15 => ObterFaixa(15);
+        public List<SorteioAcertoResumo> Sorteios14 => ObterFaixa(14);
+        public List<SorteioAcertoResumo> Sorteios13 => ObterFaixa(13);
+        public List<SorteioAcertoResumo> Sorteios12 => ObterFaixa(12);
+
+        /// <summary>Indica se houve algum sorteio oficial dentro das faixas rastreadas.</summary>
+        public bool JaFoiSorteado => SorteiosPorFaixa.Values.Any(l => l.Count > 0);
+
+        /// <summary>Total de sorteios encontrados em todas as faixas rastreadas.</summary>
+        public int TotalSorteiosEncontrados => SorteiosPorFaixa.Values.Sum(l => l.Count);
 
         /// <summary>
         /// Maior quantidade de acertos obtida entre todos os sorteios oficiais
-        /// (mesmo abaixo de 12). -1 quando não há sorteios oficiais para comparar.
+        /// (mesmo abaixo das faixas rastreadas). -1 quando não há sorteios oficiais para comparar.
         /// </summary>
         public int MelhorAcerto { get; set; } = -1;
 
@@ -46,7 +55,7 @@ namespace GeradorApostasLotofacil.DTO
 
         /// <summary>
         /// Quantos dos números selecionados NÃO foram sorteados no melhor resultado.
-        /// Corresponde a (15 - MelhorAcerto). -1 quando não há sorteios para comparar.
+        /// Corresponde a (NumerosSelecionados - MelhorAcerto). -1 quando não há sorteios para comparar.
         /// </summary>
         public int NaoSorteados => MelhorAcerto < 0 ? -1 : Numeros.Count - MelhorAcerto;
     }

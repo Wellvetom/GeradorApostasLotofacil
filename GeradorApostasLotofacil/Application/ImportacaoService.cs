@@ -6,74 +6,64 @@ namespace GeradorApostasLotofacil.Application
     public class ImportacaoService : IImportacaoService
     {
         private readonly IApostaRepository _repo;
+        private readonly ICaixaLoteriaClient _caixa;
+        private readonly LoteriaConfig _config;
 
-        public ImportacaoService(IApostaRepository repo)
+        public ImportacaoService(IApostaRepository repo, ICaixaLoteriaClient caixa, LoteriaConfig config)
         {
             _repo = repo;
+            _caixa = caixa;
+            _config = config;
         }
 
         public async Task<bool> ImportarApostas()
         {
             try
             {
-                var ultimoSorteio = await new LoteriasCaixaRobot.Interface.BuscaSorteioInterface()
-                    .BuscaSorteio(LoteriasCaixaRobot.Request.BaseRequest.TipoSorteio.Lotofacil);
-                var ultimoSorteioGravado = await _repo.ObterUltima();
-
-                if (ultimoSorteio == null)
+                // Último concurso divulgado pela Caixa (dezenas de tamanho variável conforme a modalidade).
+                var ultimoSorteio = await _caixa.ObterUltimoAsync();
+                if (ultimoSorteio == null || ultimoSorteio.NuSorteio <= 0)
                     return false;
 
-                bool finaliza = true;
-                var NuSorteio = ultimoSorteio.Aposta.NuSorteio;
-                var idSor = ultimoSorteioGravado is null ? 1 : ultimoSorteioGravado.NuSorteio;
+                var ultimoSorteioGravado = await _repo.ObterUltima(_config.Modalidade);
 
-                if (idSor == NuSorteio)
-                    finaliza = false;
+                int ultimoNumeroApi = ultimoSorteio.NuSorteio;
+                // Começa do próximo concurso ainda não gravado (ou do 1º se a base estiver vazia).
+                int proximo = ultimoSorteioGravado is null ? 1 : ultimoSorteioGravado.NuSorteio + 1;
 
-                while (finaliza)
+                // Já está tudo importado.
+                if (proximo > ultimoNumeroApi)
+                    return true;
+
+                for (int concurso = proximo; concurso <= ultimoNumeroApi; concurso++)
                 {
-                    idSor++;
-                    var buscaSorteio = await new LoteriasCaixaRobot.Interface.BuscaSorteioInterface()
-                        .BuscaSorteio(LoteriasCaixaRobot.Request.BaseRequest.TipoSorteio.Lotofacil, idSorteio: idSor);
+                    // Reaproveita o payload já obtido para o último concurso; busca os demais.
+                    var sorteio = concurso == ultimoNumeroApi
+                        ? ultimoSorteio
+                        : await _caixa.ObterPorConcursoAsync(concurso);
 
-                    var jogoVencedor = buscaSorteio.Aposta.JogoVencedor;
-                    var numerosJogo = new List<int>
-                    {
-                        jogoVencedor.PrimeiroNumero,
-                        jogoVencedor.SegundoNumero,
-                        jogoVencedor.TerceiroNumero,
-                        jogoVencedor.QuartoNumero,
-                        jogoVencedor.QuintoNumero,
-                        jogoVencedor.SextoNumero,
-                        jogoVencedor.SetimoNumero,
-                        jogoVencedor.OitavoNumero,
-                        jogoVencedor.NonoNumero,
-                        jogoVencedor.DecimoNumero,
-                        jogoVencedor.DecimoPrimeiroNumero,
-                        jogoVencedor.DecimoSegundoNumero,
-                        jogoVencedor.DecimoTerceiroNumero,
-                        jogoVencedor.DecimoQuartoNumero,
-                        jogoVencedor.DecimoQuintoNumero
-                    };
+                    if (sorteio == null || sorteio.Dezenas.Count == 0)
+                        continue;
 
-                    ApostaModel gravarAposta = new ApostaModel()
+                    // Garantia de consistência: usa exatamente a quantidade de dezenas da modalidade.
+                    var numerosJogo = sorteio.Dezenas
+                        .OrderBy(d => d)
+                        .Take(_config.NumerosPorJogo)
+                        .ToList();
+
+                    var gravarAposta = new ApostaModel
                     {
-                        DataApuracao = buscaSorteio.Aposta.DataApuracao,
+                        Modalidade = _config.Modalidade,
+                        DataApuracao = sorteio.DataApuracao,
                         DataInclusao = DateTime.Now,
-                        NuSorteio = buscaSorteio.Aposta.NuSorteio,
-                        Jogos = new List<JogoModel>()
+                        NuSorteio = sorteio.NuSorteio,
+                        Jogos = new List<JogoModel>
+                        {
+                            new JogoModel { Numeros = numerosJogo }
+                        }
                     };
 
-                    JogoModel gravarJogo = new JogoModel()
-                    {
-                        Numeros = numerosJogo
-                    };
-
-                    gravarAposta.Jogos.Add(gravarJogo);
                     await _repo.Salvar(gravarAposta);
-
-                    if (idSor == NuSorteio)
-                        finaliza = false;
                 }
 
                 return true;

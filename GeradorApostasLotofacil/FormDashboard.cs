@@ -1,4 +1,5 @@
 using GeradorApostasLotofacil.Application;
+using GeradorApostasLotofacil.Domain;
 using GeradorApostasLotofacil.DTO;
 using GeradorApostasLotofacil.Session;
 
@@ -9,18 +10,21 @@ namespace GeradorApostasLotofacil
         private readonly IDashboardService _dashboardService;
         private readonly IConferenciaService _conferenciaService;
         private readonly UsuarioSession _usuarioSession;
+        private readonly LoteriaConfig _config;
         private DashboardViewModel? _dados;
         private readonly LoadingPanel _loadingPanel;
 
         public FormDashboard(
             IDashboardService dashboardService,
             IConferenciaService conferenciaService,
-            UsuarioSession usuarioSession)
+            UsuarioSession usuarioSession,
+            LoteriaConfig config)
         {
             InitializeComponent();
             _dashboardService = dashboardService;
             _conferenciaService = conferenciaService;
             _usuarioSession = usuarioSession;
+            _config = config;
 
             _loadingPanel = new LoadingPanel();
             this.Controls.Add(_loadingPanel);
@@ -214,10 +218,10 @@ namespace GeradorApostasLotofacil
                 }
 
                 var numeros = item.Jogo.Numeros.Distinct().OrderBy(n => n).ToList();
-                if (numeros.Count != 15)
+                if (numeros.Count != _config.NumerosPorJogo)
                 {
                     MessageBox.Show(
-                        $"O jogo selecionado possui {numeros.Count} números. A verificação requer 15 números.",
+                        $"O jogo selecionado possui {numeros.Count} números. A verificação requer {_config.NumerosPorJogo} números.",
                         "Jogo inválido", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
@@ -245,9 +249,9 @@ namespace GeradorApostasLotofacil
             if (r.JaFoiSorteado)
             {
                 lblResultadoVerificacao.ForeColor = Color.FromArgb(255, 200, 100);
-                lblResultadoVerificacao.Text =
-                    $"🏆 Já foi sorteado!\n15: {r.Sorteios15.Count} | 14: {r.Sorteios14.Count} | " +
-                    $"13: {r.Sorteios13.Count} | 12: {r.Sorteios12.Count}";
+                var resumoFaixas = string.Join(" | ",
+                    _config.FaixasVerificacao.Select(f => $"{f}: {r.ObterFaixa(f).Count}"));
+                lblResultadoVerificacao.Text = $"🏆 Já foi sorteado!\n{resumoFaixas}";
             }
             else if (r.MelhorAcerto < 0)
             {
@@ -261,14 +265,12 @@ namespace GeradorApostasLotofacil
                 var origem = r.MelhorConcurso > 0 ? $"concurso {r.MelhorConcurso}" : "sorteio";
                 var complemento = data != null ? $" ({origem} — {data})" : "";
                 lblResultadoVerificacao.Text =
-                    $"❌ Nunca saiu com 12+.\nMelhor: {r.MelhorAcerto} acertos{complemento}";
+                    $"❌ Nunca saiu com {_config.FaixaMinimaVerificacao}+.\nMelhor: {r.MelhorAcerto} acertos{complemento}";
             }
 
-            // Grid: sorteios com 12+ acertos ordenados por faixa (15→12) e data.
-            var linhas = r.Sorteios15
-                .Concat(r.Sorteios14)
-                .Concat(r.Sorteios13)
-                .Concat(r.Sorteios12)
+            // Grid: sorteios nas faixas rastreadas ordenados por faixa (desc) e data.
+            var linhas = _config.FaixasVerificacao
+                .SelectMany(f => r.ObterFaixa(f))
                 .Select(s => new
                 {
                     Acertos = $"{s.Acertos}",
@@ -326,7 +328,7 @@ namespace GeradorApostasLotofacil
             int chartWidth = panelGraficoAcertos.Width - padding * 2;
 
             // Título
-            g.DrawString("Distribuição de Acertos (11+)",
+            g.DrawString($"Distribuição de Acertos ({_config.RotuloFaixaMinima})",
                 new Font("Segoe UI", 10F, FontStyle.Bold), Brushes.White,
                 new PointF(padding, 5));
 
@@ -335,19 +337,25 @@ namespace GeradorApostasLotofacil
             g.DrawLine(penAxis, padding, padding + 20, padding, padding + chartHeight);
             g.DrawLine(penAxis, padding, padding + chartHeight, padding + chartWidth, padding + chartHeight);
 
-            // Barras para acertos 11 a 15
-            var cores = new Color[]
+            // Paleta de cores reutilizável por faixa.
+            var paleta = new Color[]
             {
-                Color.FromArgb(255, 99, 132),   // 11
-                Color.FromArgb(255, 159, 64),   // 12
-                Color.FromArgb(255, 205, 86),   // 13
-                Color.FromArgb(75, 192, 192),   // 14
-                Color.FromArgb(54, 162, 235)    // 15
+                Color.FromArgb(255, 99, 132),
+                Color.FromArgb(255, 159, 64),
+                Color.FromArgb(255, 205, 86),
+                Color.FromArgb(75, 192, 192),
+                Color.FromArgb(54, 162, 235),
+                Color.FromArgb(153, 102, 255),
+                Color.FromArgb(120, 200, 120)
             };
 
+            // Faixas premiadas em ordem crescente (ex.: 11..15 na Lotofácil; 4..6 na Mega Sena).
+            var faixas = _config.FaixasPremio.OrderBy(f => f).ToList();
+
             int x = padding + spacing;
-            for (int acertos = 11; acertos <= 15; acertos++)
+            for (int idx = 0; idx < faixas.Count; idx++)
             {
+                int acertos = faixas[idx];
                 _dados.DistribuicaoAcertos.TryGetValue(acertos, out int quantidade);
 
                 int barHeight = maxValue > 0
@@ -355,9 +363,8 @@ namespace GeradorApostasLotofacil
                     : 0;
 
                 int y = padding + 20 + (chartHeight - 30) - barHeight;
-                int corIndex = acertos - 11;
 
-                using var brush = new SolidBrush(cores[corIndex]);
+                using var brush = new SolidBrush(paleta[idx % paleta.Length]);
                 g.FillRectangle(brush, x, y, barWidth, barHeight);
 
                 // Label acima da barra

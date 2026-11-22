@@ -10,13 +10,15 @@ namespace GeradorApostasLotofacil
         private readonly IConferenciaService _conferenciaService;
         private readonly IApostaService _apostaService;
         private readonly IGeracaoService _geracaoService;
+        private readonly ICaixaLoteriaClient _caixa;
         private readonly UsuarioSession _usuarioSession;
+        private readonly LoteriaConfig _config;
         private readonly LoadingPanel _loadingPanel;
 
-        private const int TotalNumeros = 25;
-        private const int NumerosPorAposta = 15;
+        private int TotalNumeros => _config.TotalNumeros;
+        private int NumerosPorAposta => _config.NumerosPorJogo;
 
-        // Botões toggle de 1 a 25. O estado "selecionado" é guardado no Tag (bool).
+        // Botões toggle de 1 a TotalNumeros. O estado "selecionado" é guardado no Tag (bool).
         private readonly List<Button> _botoes = new();
 
         // Cores do estado dos botões
@@ -28,13 +30,17 @@ namespace GeradorApostasLotofacil
             IConferenciaService conferenciaService,
             IApostaService apostaService,
             IGeracaoService geracaoService,
-            UsuarioSession usuarioSession)
+            ICaixaLoteriaClient caixa,
+            UsuarioSession usuarioSession,
+            LoteriaConfig config)
         {
             InitializeComponent();
             _conferenciaService = conferenciaService;
             _apostaService = apostaService;
             _geracaoService = geracaoService;
+            _caixa = caixa;
             _usuarioSession = usuarioSession;
+            _config = config;
 
             CriarBotoesNumeros();
             AtualizarContador();
@@ -43,7 +49,7 @@ namespace GeradorApostasLotofacil
             this.Controls.Add(_loadingPanel);
         }
 
-        /// <summary>Cria os 25 botões selecionáveis (1 a 25).</summary>
+        /// <summary>Cria os botões selecionáveis (1 a TotalNumeros).</summary>
         private void CriarBotoesNumeros()
         {
             for (int i = 1; i <= TotalNumeros; i++)
@@ -63,6 +69,8 @@ namespace GeradorApostasLotofacil
                 };
                 btn.FlatAppearance.BorderSize = 0;
                 btn.Click += NumeroBotao_Click;
+                // Mantém o foco no painel ao passar o mouse, para a roda do mouse rolar a lista.
+                btn.MouseEnter += (_, _) => flowNumeros.Focus();
 
                 _botoes.Add(btn);
                 flowNumeros.Controls.Add(btn);
@@ -77,7 +85,7 @@ namespace GeradorApostasLotofacil
 
             if (!selecionado)
             {
-                // Impede selecionar mais que 15
+                // Impede selecionar mais que o limite da modalidade
                 if (ContarSelecionados() >= NumerosPorAposta)
                 {
                     MessageBox.Show(
@@ -115,9 +123,9 @@ namespace GeradorApostasLotofacil
         {
             int selecionados = ContarSelecionados();
             lblInstrucao.Text =
-                $"Selecione 15 números (1 a 25).  Selecionados: {selecionados}/{NumerosPorAposta}";
+                $"Selecione {NumerosPorAposta} números (1 a {TotalNumeros}).  Selecionados: {selecionados}/{NumerosPorAposta}";
 
-            // Habilita Verificar/Gravar apenas quando exatamente 15 estão marcados.
+            // Habilita Verificar/Gravar apenas quando a quantidade correta está marcada.
             bool completo = selecionados == NumerosPorAposta;
             btnVerificar.Enabled = completo;
             btnGravar.Enabled = completo;
@@ -183,10 +191,9 @@ namespace GeradorApostasLotofacil
                 _loadingPanel.Exibir("Gravando aposta...");
 
                 // Busca o próximo sorteio para associar a data de apuração (mesmo padrão da geração automática).
-                var retornoRobo = await new LoteriasCaixaRobot.Interface.BuscaSorteioInterface()
-                    .BuscaUltimoSorteio(LoteriasCaixaRobot.Request.BaseRequest.TipoSorteio.Lotofacil);
+                var ultimoSorteio = await _caixa.ObterUltimoAsync();
 
-                var dataApuracao = retornoRobo.DataProximoSorteio;
+                var dataApuracao = ultimoSorteio.DataProximoSorteio;
                 var jogosNumeros = new List<List<int>> { numeros };
 
                 bool duplicada = await _apostaService.ExisteApostaDuplicada(
@@ -251,18 +258,18 @@ namespace GeradorApostasLotofacil
                 lblJaApostou.Text = "❌ Não — você ainda não apostou esse jogo.";
             }
 
-            // Card 2: já foi sorteado com 12+?
+            // Card 2: já foi sorteado nas faixas rastreadas?
             if (r.JaFoiSorteado)
             {
                 lblJaSorteado.ForeColor = Color.FromArgb(255, 200, 100);
-                lblJaSorteado.Text =
-                    $"🏆 Sim — 15: {r.Sorteios15.Count} | 14: {r.Sorteios14.Count} | " +
-                    $"13: {r.Sorteios13.Count} | 12: {r.Sorteios12.Count}";
+                var resumoFaixas = string.Join(" | ",
+                    _config.FaixasVerificacao.Select(f => $"{f}: {r.ObterFaixa(f).Count}"));
+                lblJaSorteado.Text = $"🏆 Sim — {resumoFaixas}";
             }
             else
             {
                 lblJaSorteado.ForeColor = Color.FromArgb(210, 210, 230);
-                lblJaSorteado.Text = "❌ Não — nunca saiu com 12 ou mais acertos.";
+                lblJaSorteado.Text = $"❌ Não — nunca saiu com {_config.FaixaMinimaVerificacao} ou mais acertos.";
             }
 
             // Card 3: melhor resultado (acertos × números não sorteados)
@@ -281,11 +288,9 @@ namespace GeradorApostasLotofacil
                     $"🎯 {r.MelhorAcerto} acertos · {r.NaoSorteados} não sorteados{complemento}";
             }
 
-            // Grid: todos os sorteios com 12+ acertos, ordenados por faixa (15→12) e data.
-            var linhas = r.Sorteios15
-                .Concat(r.Sorteios14)
-                .Concat(r.Sorteios13)
-                .Concat(r.Sorteios12)
+            // Grid: todos os sorteios nas faixas rastreadas, ordenados por faixa (desc) e data.
+            var linhas = _config.FaixasVerificacao
+                .SelectMany(f => r.ObterFaixa(f))
                 .Select(s => new
                 {
                     Faixa = $"{s.Acertos}",
@@ -343,12 +348,12 @@ namespace GeradorApostasLotofacil
         }
 
         /// <summary>
-        /// Diálogo modal que pergunta o alvo de acertos (11 a 14) e a quantidade mínima
+        /// Diálogo modal que pergunta o alvo de acertos (faixas da modalidade) e a quantidade mínima
         /// de sorteios já ocorridos que devem atingir esse alvo.
         /// </summary>
         private bool PerguntarCriterio(out int acertosAlvo, out int minSorteios)
         {
-            acertosAlvo = 11;
+            acertosAlvo = _config.CriterioAlvoOpcoes.First();
             minSorteios = 1;
 
             using var dlg = new Form
@@ -377,7 +382,7 @@ namespace GeradorApostasLotofacil
                 Size = new Size(120, 28),
                 Font = new Font("Segoe UI", 10F)
             };
-            cmbAlvo.Items.AddRange(new object[] { 11, 12, 13, 14 });
+            cmbAlvo.Items.AddRange(_config.CriterioAlvoOpcoes.Select(o => (object)o).ToArray());
             cmbAlvo.SelectedIndex = 0;
 
             var lblQtd = new Label

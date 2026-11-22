@@ -7,12 +7,12 @@ namespace GeradorApostasLotofacil.DTO
         public DateTime? DataUltimoSorteio { get; set; }
 
         /// <summary>
-        /// Top 15 números mais sorteados (oficiais)
+        /// Top números mais sorteados (oficiais)
         /// </summary>
         public List<(int Numero, int Frequencia)> NumerosQueMaisSairam { get; set; } = new();
 
         /// <summary>
-        /// Top 15 números que menos saíram (oficiais)
+        /// Top números que menos saíram (oficiais)
         /// </summary>
         public List<(int Numero, int Frequencia)> NumerosQueMenosSairam { get; set; } = new();
 
@@ -27,21 +27,20 @@ namespace GeradorApostasLotofacil.DTO
         public int JogosRepetidos { get; set; }
 
         /// <summary>
-        /// Pares de sorteios com 12 números em comum
+        /// Pares de sorteios agrupados por quantidade de números em comum.
+        /// Chave = quantidade de números em comum (dependente da modalidade).
         /// </summary>
-        public List<ParSorteioComum> ParesCom12 { get; set; } = new();
+        public Dictionary<int, List<ParSorteioComum>> ParesPorComum { get; set; } = new();
 
-        /// <summary>
-        /// Pares de sorteios com 13 números em comum
-        /// </summary>
-        public List<ParSorteioComum> ParesCom13 { get; set; } = new();
+        /// <summary>Obtém os pares de uma faixa de interseção (vazia se não houver).</summary>
+        public List<ParSorteioComum> ObterPares(int comum) =>
+            ParesPorComum.TryGetValue(comum, out var lista) ? lista : new List<ParSorteioComum>();
 
-        /// <summary>
-        /// Pares de sorteios com 14 números em comum
-        /// </summary>
-        public List<ParSorteioComum> ParesCom14 { get; set; } = new();
+        // ---- Compatibilidade com a tela da Lotofácil (faixas fixas 12/13/14) ----
+        public List<ParSorteioComum> ParesCom12 => ObterPares(12);
+        public List<ParSorteioComum> ParesCom13 => ObterPares(13);
+        public List<ParSorteioComum> ParesCom14 => ObterPares(14);
 
-        // Mantidos para compatibilidade
         public int JogosComum12 => ParesCom12.Count;
         public int JogosComum13 => ParesCom13.Count;
         public int JogosComum14 => ParesCom14.Count;

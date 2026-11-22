@@ -1,3 +1,4 @@
+using GeradorApostasLotofacil.Domain;
 using GeradorApostasLotofacil.DTO;
 using GeradorApostasLotofacil.Infrastructure;
 using Microsoft.EntityFrameworkCore;
@@ -7,17 +8,19 @@ namespace GeradorApostasLotofacil.Application
     public class AdminDashboardService : IAdminDashboardService
     {
         private readonly AppDbContext _context;
+        private readonly LoteriaConfig _config;
 
-        public AdminDashboardService(AppDbContext context)
+        public AdminDashboardService(AppDbContext context, LoteriaConfig config)
         {
             _context = context;
+            _config = config;
         }
 
         public async Task<AdminDashboardViewModel> ObterDashboardAdmin()
         {
-            // Apenas apostas importadas (sem usuário = oficiais)
+            // Apenas apostas importadas (sem usuário = oficiais) da modalidade
             var apostasImportadas = await _context.Apostas
-                .Where(a => a.UsuarioId == null && a.DataExclusao == null)
+                .Where(a => a.UsuarioId == null && a.DataExclusao == null && a.Modalidade == _config.Modalidade)
                 .Include(a => a.Jogos)
                 .OrderByDescending(a => a.NuSorteio)
                 .ToListAsync();
@@ -58,10 +61,13 @@ namespace GeradorApostasLotofacil.Application
                 })
                 .ToList();
 
-            // Jogos repetidos (15 números iguais)
+            // Jogos repetidos (todos os números iguais)
             var todosJogos = apostasImportadas
-                .SelectMany(a => a.Jogos)
-                .Select(j => new { Numeros = j.Numeros.OrderBy(n => n).ToList(), NuSorteio = apostasImportadas.First(ap => ap.Jogos.Contains(j)).NuSorteio })
+                .SelectMany(a => a.Jogos.Select(j => new
+                {
+                    Numeros = j.Numeros.OrderBy(n => n).ToList(),
+                    NuSorteio = a.NuSorteio
+                }))
                 .ToList();
 
             var hashes = todosJogos
@@ -71,38 +77,38 @@ namespace GeradorApostasLotofacil.Application
 
             dashboard.JogosRepetidos = hashes;
 
-            // Jogos com 12, 13 e 14 números em comum
-            var paresCom12 = new List<ParSorteioComum>();
-            var paresCom13 = new List<ParSorteioComum>();
-            var paresCom14 = new List<ParSorteioComum>();
+            // Pares de sorteios com interseção dentro das faixas rastreadas pela modalidade.
+            // Lotofácil: 12,13,14. Mega Sena: 3,4,5. (A faixa máxima = jogo idêntico é ignorada.)
+            var faixas = _config.FaixasParesComuns;
+            foreach (var faixa in faixas)
+                dashboard.ParesPorComum[faixa] = new List<ParSorteioComum>();
 
-            for (int i = 0; i < todosJogos.Count; i++)
+            if (faixas.Count > 0)
             {
-                for (int j = i + 1; j < todosJogos.Count; j++)
+                int faixaMin = faixas.Min();
+                int faixaMax = faixas.Max();
+
+                for (int i = 0; i < todosJogos.Count; i++)
                 {
-                    var comuns = todosJogos[i].Numeros.Intersect(todosJogos[j].Numeros).ToList();
-                    int intersecao = comuns.Count;
-
-                    if (intersecao >= 12 && intersecao < 15)
+                    for (int j = i + 1; j < todosJogos.Count; j++)
                     {
-                        var par = new ParSorteioComum
-                        {
-                            Sorteio1 = todosJogos[i].NuSorteio,
-                            Sorteio2 = todosJogos[j].NuSorteio,
-                            NumerosEmComum = intersecao,
-                            NumerosComuns = string.Join(", ", comuns.OrderBy(n => n).Select(n => n.ToString("D2")))
-                        };
+                        var comuns = todosJogos[i].Numeros.Intersect(todosJogos[j].Numeros).ToList();
+                        int intersecao = comuns.Count;
 
-                        if (intersecao == 12) paresCom12.Add(par);
-                        else if (intersecao == 13) paresCom13.Add(par);
-                        else if (intersecao == 14) paresCom14.Add(par);
+                        if (intersecao >= faixaMin && intersecao <= faixaMax &&
+                            dashboard.ParesPorComum.TryGetValue(intersecao, out var lista))
+                        {
+                            lista.Add(new ParSorteioComum
+                            {
+                                Sorteio1 = todosJogos[i].NuSorteio,
+                                Sorteio2 = todosJogos[j].NuSorteio,
+                                NumerosEmComum = intersecao,
+                                NumerosComuns = string.Join(", ", comuns.OrderBy(n => n).Select(n => n.ToString("D2")))
+                            });
+                        }
                     }
                 }
             }
-
-            dashboard.ParesCom12 = paresCom12;
-            dashboard.ParesCom13 = paresCom13;
-            dashboard.ParesCom14 = paresCom14;
 
             return dashboard;
         }

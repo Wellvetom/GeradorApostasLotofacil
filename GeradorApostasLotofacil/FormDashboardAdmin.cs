@@ -1,4 +1,5 @@
 using GeradorApostasLotofacil.Application;
+using GeradorApostasLotofacil.Domain;
 using GeradorApostasLotofacil.DTO;
 using GeradorApostasLotofacil.Session;
 
@@ -8,16 +9,19 @@ namespace GeradorApostasLotofacil
     {
         private readonly IAdminDashboardService _adminDashboardService;
         private readonly UsuarioSession _usuarioSession;
+        private readonly LoteriaConfig _config;
         private AdminDashboardViewModel? _dados;
         private readonly LoadingPanel _loadingPanel;
 
         public FormDashboardAdmin(
             IAdminDashboardService adminDashboardService,
-            UsuarioSession usuarioSession)
+            UsuarioSession usuarioSession,
+            LoteriaConfig config)
         {
             InitializeComponent();
             _adminDashboardService = adminDashboardService;
             _usuarioSession = usuarioSession;
+            _config = config;
 
             _loadingPanel = new LoadingPanel();
             this.Controls.Add(_loadingPanel);
@@ -152,26 +156,35 @@ namespace GeradorApostasLotofacil
             {
                 if (_dados == null) return;
 
-                // Grid 12 em comum
-                dgvComum12.DataSource = _dados.ParesCom12
-                    .Select(p => new { Sorteio_A = p.Sorteio1, Sorteio_B = p.Sorteio2, Comuns = p.NumerosComuns })
-                    .ToList();
-                dgvComum12.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-                lblTituloComum12.Text = $"🔗 12 em comum ({_dados.ParesCom12.Count})";
+                // Mapeia as 3 grades fixas da UI às 3 faixas de "números em comum" da modalidade.
+                // Lotofácil: 12,13,14. Mega Sena: 3,4,5.
+                var faixas = _config.FaixasParesComuns.OrderBy(f => f).ToList();
+                var grids = new[] { dgvComum12, dgvComum13, dgvComum14 };
+                var titulos = new[] { lblTituloComum12, lblTituloComum13, lblTituloComum14 };
 
-                // Grid 13 em comum
-                dgvComum13.DataSource = _dados.ParesCom13
-                    .Select(p => new { Sorteio_A = p.Sorteio1, Sorteio_B = p.Sorteio2, Comuns = p.NumerosComuns })
-                    .ToList();
-                dgvComum13.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-                lblTituloComum13.Text = $"🔗 13 em comum ({_dados.ParesCom13.Count})";
+                for (int i = 0; i < grids.Length; i++)
+                {
+                    if (i < faixas.Count)
+                    {
+                        int faixa = faixas[i];
+                        var pares = _dados.ObterPares(faixa);
 
-                // Grid 14 em comum
-                dgvComum14.DataSource = _dados.ParesCom14
-                    .Select(p => new { Sorteio_A = p.Sorteio1, Sorteio_B = p.Sorteio2, Comuns = p.NumerosComuns })
-                    .ToList();
-                dgvComum14.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-                lblTituloComum14.Text = $"🔗 14 em comum ({_dados.ParesCom14.Count})";
+                        grids[i].DataSource = pares
+                            .Select(p => new { Sorteio_A = p.Sorteio1, Sorteio_B = p.Sorteio2, Comuns = p.NumerosComuns })
+                            .ToList();
+                        grids[i].AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+                        grids[i].Visible = true;
+                        titulos[i].Text = $"🔗 {faixa} em comum ({pares.Count})";
+                        titulos[i].Visible = true;
+                    }
+                    else
+                    {
+                        // Modalidade com menos faixas que grades disponíveis: oculta as sobrando.
+                        grids[i].DataSource = null;
+                        grids[i].Visible = false;
+                        titulos[i].Visible = false;
+                    }
+                }
             }
             catch (Exception ex)
             {

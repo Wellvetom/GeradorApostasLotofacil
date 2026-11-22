@@ -9,26 +9,30 @@ namespace GeradorApostasLotofacil.Application
     public class DashboardService : IDashboardService
     {
         private readonly AppDbContext _context;
+        private readonly LoteriaConfig _config;
 
-        public DashboardService(AppDbContext context)
+        public DashboardService(AppDbContext context, LoteriaConfig config)
         {
             _context = context;
+            _config = config;
         }
 
         public async Task<DashboardViewModel> ObterDashboard(int usuarioId)
         {
             try
             {
-                // Apostas do usuário (ativas)
+                int faixaMinima = _config.FaixaMinimaPremio;
+
+                // Apostas do usuário (ativas) da modalidade
                 var apostasUsuario = await _context.Apostas
-                    .Where(a => a.UsuarioId == usuarioId && a.DataExclusao == null)
+                    .Where(a => a.UsuarioId == usuarioId && a.DataExclusao == null && a.Modalidade == _config.Modalidade)
                     .Include(a => a.Jogos)
                     .OrderByDescending(a => a.DataInclusao)
                     .ToListAsync();
 
-                // Resultados oficiais para comparação
+                // Resultados oficiais para comparação (da modalidade)
                 var resultadosOficiais = await _context.Apostas
-                    .Where(a => a.UsuarioId == null)
+                    .Where(a => a.UsuarioId == null && a.Modalidade == _config.Modalidade)
                     .Include(a => a.Jogos)
                     .ToListAsync();
 
@@ -87,7 +91,7 @@ namespace GeradorApostasLotofacil.Application
                             }
                         }
 
-                        if (acertos >= 11)
+                        if (acertos >= faixaMinima)
                         {
                             distribuicao.TryGetValue(acertos, out int count);
                             distribuicao[acertos] = count + 1;

@@ -10,39 +10,45 @@ namespace GeradorApostasLotofacil.Application
     {
         private readonly IApostaRepository _repo;
         private readonly AppDbContext _context;
+        private readonly LoteriaConfig _config;
 
-        public GeracaoService(IApostaRepository repo, AppDbContext context)
+        public GeracaoService(IApostaRepository repo, AppDbContext context, LoteriaConfig config)
         {
             _repo = repo;
             _context = context;
+            _config = config;
         }
 
         public ApostaModel GerarJogosInteligentes(decimal quantidadeJogos, int qtdMaisSorteados = 12, int qtdMenosSorteados = 0)
         {
             var random = new Random();
+            int numerosPorJogo = _config.NumerosPorJogo;
 
-            // Ranking completo ordenado por frequência (mais sorteados primeiro)
-            var ranking = _repo.ObterRankingNumeros();
+            // Ranking completo ordenado por frequência (mais sorteados primeiro) da modalidade.
+            var ranking = _repo.ObterRankingNumeros(_config.Modalidade);
 
-            // Números mais sorteados (top N do ranking)
+            // Números mais sorteados (top N do ranking, limitado ao tamanho do jogo)
             var maisSorteados = ranking
-                .Take(15)
+                .Take(numerosPorJogo)
                 .Select(x => x.Numero)
                 .ToList();
 
-            // Números menos sorteados (últimos 15 do ranking)
+            // Números menos sorteados (últimos N do ranking)
             var menosSorteados = ranking
                 .OrderBy(x => x.Quantidade)
-                .Take(15)
+                .Take(numerosPorJogo)
                 .Select(x => x.Numero)
                 .ToList();
 
-            // TODOS os números possíveis da Lotofácil
-            var todosNumeros = Enumerable.Range(1, 25).ToList();
+            // TODOS os números possíveis da modalidade
+            var todosNumeros = Enumerable.Range(1, _config.TotalNumeros).ToList();
 
-            // Busca jogos já existentes para garantir ineditismo
-            var hashesExistentes = _context.Jogos
+            // Busca jogos já existentes (da modalidade) para garantir ineditismo
+            var hashesExistentes = _context.Apostas
+                .Where(a => a.Modalidade == _config.Modalidade)
+                .Include(a => a.Jogos)
                 .AsEnumerable()
+                .SelectMany(a => a.Jogos)
                 .Select(j => JogoHelper.GerarHashJogo(j.Numeros))
                 .ToHashSet();
 
@@ -52,6 +58,7 @@ namespace GeradorApostasLotofacil.Application
             // Cria aposta
             var aposta = new ApostaModel
             {
+                Modalidade = _config.Modalidade,
                 DataInclusao = DateTime.Now,
                 Jogos = new List<JogoModel>()
             };
@@ -76,8 +83,7 @@ namespace GeradorApostasLotofacil.Application
                 }
 
                 // 2) Seleciona números dos MENOS sorteados, ignorando os que já
-                //    foram escolhidos no passo anterior (evita sobreposição entre
-                //    os pools de mais e menos sorteados, que compartilham números).
+                //    foram escolhidos no passo anterior.
                 int alvoAposMenos = numerosSelecionados.Count + qtdMenosSorteados;
                 foreach (var numero in menosSorteados.OrderBy(_ => random.Next()))
                 {
@@ -86,10 +92,10 @@ namespace GeradorApostasLotofacil.Application
                 }
 
                 // 3) Completa o restante com números aleatórios ainda não usados,
-                //    até totalizar 15 números distintos.
+                //    até totalizar o tamanho do jogo da modalidade.
                 foreach (var numero in todosNumeros.OrderBy(_ => random.Next()))
                 {
-                    if (numerosSelecionados.Count >= 15) break;
+                    if (numerosSelecionados.Count >= numerosPorJogo) break;
                     numerosSelecionados.Add(numero); // Add ignora duplicatas
                 }
 
@@ -98,8 +104,8 @@ namespace GeradorApostasLotofacil.Application
                     .OrderBy(x => x)
                     .ToList();
 
-                // Salvaguarda: garante 15 números distintos antes de aceitar o jogo.
-                if (numerosJogo.Count != 15 || numerosJogo.Distinct().Count() != 15)
+                // Salvaguarda: garante a quantidade correta de números distintos.
+                if (numerosJogo.Count != numerosPorJogo || numerosJogo.Distinct().Count() != numerosPorJogo)
                     continue;
 
                 // Gera hash único
@@ -133,19 +139,23 @@ namespace GeradorApostasLotofacil.Application
 
         public List<int> GerarJogoComCriterio(int acertosAlvo, int minSorteios)
         {
-            if (acertosAlvo < 11 || acertosAlvo > 14)
+            int alvoMin = _config.CriterioAlvoOpcoes.Min();
+            int alvoMax = _config.CriterioAlvoOpcoes.Max();
+
+            if (acertosAlvo < alvoMin || acertosAlvo > alvoMax)
                 throw new ArgumentOutOfRangeException(nameof(acertosAlvo),
-                    "O alvo de acertos deve ser 11, 12, 13 ou 14.");
+                    $"O alvo de acertos deve estar entre {alvoMin} e {alvoMax}.");
 
             if (minSorteios < 1)
                 throw new ArgumentOutOfRangeException(nameof(minSorteios),
                     "A quantidade de sorteios deve ser pelo menos 1.");
 
             var random = new Random();
+            int numerosPorJogo = _config.NumerosPorJogo;
 
-            // Conjuntos de números de cada sorteio oficial importado (UsuarioId == null).
+            // Conjuntos de números de cada sorteio oficial importado (UsuarioId == null) da modalidade.
             var sorteiosOficiais = _context.Apostas
-                .Where(a => a.UsuarioId == null)
+                .Where(a => a.UsuarioId == null && a.Modalidade == _config.Modalidade)
                 .Include(a => a.Jogos)
                 .AsEnumerable()
                 .SelectMany(a => a.Jogos)
@@ -162,23 +172,26 @@ namespace GeradorApostasLotofacil.Application
                     $"Existem apenas {sorteiosOficiais.Count} sorteios importados, " +
                     $"menos que os {minSorteios} solicitados.");
 
-            // Hashes já existentes na base (jogos de usuários e sorteios) para garantir ineditismo.
-            var hashesExistentes = _context.Jogos
+            // Hashes já existentes na base (da modalidade) para garantir ineditismo.
+            var hashesExistentes = _context.Apostas
+                .Where(a => a.Modalidade == _config.Modalidade)
+                .Include(a => a.Jogos)
                 .AsEnumerable()
+                .SelectMany(a => a.Jogos)
                 .Select(j => JogoHelper.GerarHashJogo(j.Numeros))
                 .ToHashSet();
 
-            var todosNumeros = Enumerable.Range(1, 25).ToList();
+            var todosNumeros = Enumerable.Range(1, _config.TotalNumeros).ToList();
 
             // Espaço de busca é grande; usamos tentativas aleatórias com um teto de segurança.
             const int maxTentativas = 200_000;
 
             for (int tentativa = 0; tentativa < maxTentativas; tentativa++)
             {
-                // Sorteia 15 números distintos de 1 a 25.
+                // Sorteia N números distintos de 1 a TotalNumeros.
                 var numerosJogo = todosNumeros
                     .OrderBy(_ => random.Next())
-                    .Take(15)
+                    .Take(numerosPorJogo)
                     .OrderBy(n => n)
                     .ToList();
 

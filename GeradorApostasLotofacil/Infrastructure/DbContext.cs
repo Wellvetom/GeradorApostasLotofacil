@@ -54,6 +54,13 @@ namespace GeradorApostasLotofacil.Infrastructure
                     v => JsonSerializer.Deserialize<List<int>>(v, (JsonSerializerOptions?)null) ?? new List<int>()
                 )
                 .HasColumnType("nvarchar(max)");
+
+            // Modalidade persistida como int (0 = Lotofácil, 1 = Mega Sena).
+            // Registros existentes recebem 0 (Lotofácil) via valor default na migration.
+            modelBuilder.Entity<ApostaModel>()
+                .Property(a => a.Modalidade)
+                .HasConversion<int>()
+                .HasDefaultValue(Modalidade.Lotofacil);
         }
     }
 }

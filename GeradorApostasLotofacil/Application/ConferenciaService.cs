@@ -9,10 +9,12 @@ namespace GeradorApostasLotofacil.Application
     public class ConferenciaService : IConferenciaService
     {
         private readonly AppDbContext _context;
+        private readonly LoteriaConfig _config;
 
-        public ConferenciaService(AppDbContext context)
+        public ConferenciaService(AppDbContext context, LoteriaConfig config)
         {
             _context = context;
+            _config = config;
         }
 
         public async Task<VerificacaoApostaViewModel> VerificarAposta(int usuarioId, List<int> numeros)
@@ -23,11 +25,17 @@ namespace GeradorApostasLotofacil.Application
                 Numeros = numerosOrdenados
             };
 
+            // Inicializa o dicionário de faixas rastreadas para esta modalidade.
+            foreach (var faixa in _config.FaixasVerificacao)
+                resultado.SorteiosPorFaixa[faixa] = new List<SorteioAcertoResumo>();
+
+            int faixaMinima = _config.FaixaMinimaVerificacao;
+
             var hashProcurado = JogoHelper.GerarHashJogo(numerosOrdenados);
 
-            // 1) Apostas do próprio usuário que contenham exatamente esses 15 números.
+            // 1) Apostas do próprio usuário (da modalidade) que contenham exatamente esses números.
             var apostasUsuario = await _context.Apostas
-                .Where(a => a.UsuarioId == usuarioId && a.DataExclusao == null)
+                .Where(a => a.UsuarioId == usuarioId && a.DataExclusao == null && a.Modalidade == _config.Modalidade)
                 .Include(a => a.Jogos)
                 .ToListAsync();
 
@@ -51,9 +59,9 @@ namespace GeradorApostasLotofacil.Application
                 .OrderByDescending(a => a.DataInclusao)
                 .ToList();
 
-            // 2) Resultados oficiais (importados) e interseção com os números informados.
+            // 2) Resultados oficiais (importados) da modalidade e interseção com os números informados.
             var resultadosOficiais = await _context.Apostas
-                .Where(a => a.UsuarioId == null)
+                .Where(a => a.UsuarioId == null && a.Modalidade == _config.Modalidade)
                 .Include(a => a.Jogos)
                 .ToListAsync();
 
@@ -71,7 +79,7 @@ namespace GeradorApostasLotofacil.Application
 
                 int acertos = acertados.Count;
 
-                // Acompanha o melhor resultado entre TODOS os sorteios (mesmo abaixo de 12).
+                // Acompanha o melhor resultado entre TODOS os sorteios (mesmo abaixo da faixa mínima).
                 if (acertos > resultado.MelhorAcerto)
                 {
                     resultado.MelhorAcerto = acertos;
@@ -79,7 +87,7 @@ namespace GeradorApostasLotofacil.Application
                     resultado.MelhorData = sorteio.DataApuracao;
                 }
 
-                if (acertos < 12) continue;
+                if (acertos < faixaMinima) continue;
 
                 var resumo = new SorteioAcertoResumo
                 {
@@ -89,20 +97,18 @@ namespace GeradorApostasLotofacil.Application
                     NumerosAcertados = acertados
                 };
 
-                switch (acertos)
-                {
-                    case 15: resultado.Sorteios15.Add(resumo); break;
-                    case 14: resultado.Sorteios14.Add(resumo); break;
-                    case 13: resultado.Sorteios13.Add(resumo); break;
-                    case 12: resultado.Sorteios12.Add(resumo); break;
-                }
+                // Só registra se a faixa é rastreada por esta modalidade.
+                if (resultado.SorteiosPorFaixa.TryGetValue(acertos, out var lista))
+                    lista.Add(resumo);
             }
 
             // Ordena cada faixa por data de sorteio (mais recente primeiro).
-            resultado.Sorteios15 = resultado.Sorteios15.OrderByDescending(s => s.DataApuracao).ToList();
-            resultado.Sorteios14 = resultado.Sorteios14.OrderByDescending(s => s.DataApuracao).ToList();
-            resultado.Sorteios13 = resultado.Sorteios13.OrderByDescending(s => s.DataApuracao).ToList();
-            resultado.Sorteios12 = resultado.Sorteios12.OrderByDescending(s => s.DataApuracao).ToList();
+            foreach (var faixa in resultado.SorteiosPorFaixa.Keys.ToList())
+            {
+                resultado.SorteiosPorFaixa[faixa] = resultado.SorteiosPorFaixa[faixa]
+                    .OrderByDescending(s => s.DataApuracao)
+                    .ToList();
+            }
 
             return resultado;
         }
@@ -110,7 +116,7 @@ namespace GeradorApostasLotofacil.Application
         public List<(string Jogo, int Quantidade)> ObterJogosRepetidos()
         {
             var jogosOficiais = _context.Apostas
-                .Where(a => a.UsuarioId == null)
+                .Where(a => a.UsuarioId == null && a.Modalidade == _config.Modalidade)
                 .SelectMany(a => a.Jogos)
                 .AsEnumerable()
                 .Select(j => JogoHelper.GerarHashJogoRepetido(j))
@@ -128,15 +134,15 @@ namespace GeradorApostasLotofacil.Application
 
         public async Task<List<ApostaResultadoViewModel>> ObterApostasComResultado(int usuarioId)
         {
-            // apostas do usuário
+            // apostas do usuário (da modalidade)
             var apostasUsuario = await _context.Apostas
-                .Where(a => a.UsuarioId == usuarioId && a.DataExclusao == null)
+                .Where(a => a.UsuarioId == usuarioId && a.DataExclusao == null && a.Modalidade == _config.Modalidade)
                 .Include(a => a.Jogos)
                 .ToListAsync();
 
-            // apostas importadas pelo RPA
+            // apostas importadas pelo RPA (da modalidade)
             var apostasResultado = await _context.Apostas
-                .Where(a => a.UsuarioId == null)
+                .Where(a => a.UsuarioId == null && a.Modalidade == _config.Modalidade)
                 .Include(a => a.Jogos)
                 .ToListAsync();
 

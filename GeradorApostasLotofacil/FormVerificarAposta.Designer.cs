@@ -84,6 +84,8 @@ namespace GeradorApostasLotofacil
             // flowNumeros
             // 
             flowNumeros.Location = new Point(20, 78);
+            flowNumeros.AutoScroll = true;
+            flowNumeros.FlowDirection = FlowDirection.LeftToRight;
             flowNumeros.Name = "flowNumeros";
             flowNumeros.Size = new Size(720, 170);
             flowNumeros.WrapContents = true;

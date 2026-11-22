@@ -14,7 +14,9 @@ namespace GeradorApostasLotofacil
     {
         private readonly IConferenciaService _conferenciaService;
         private readonly IApostaService _apostaService;
+        private readonly ICaixaLoteriaClient _caixa;
         private readonly UsuarioSession _usuarioSession;
+        private readonly LoteriaConfig _config;
         private List<ApostaGridViewModel>? apostasBuscadas;
         private List<ApostaResultadoViewModel>? _apostasOriginais;
         private readonly LoadingPanel _loadingPanel;
@@ -22,12 +24,16 @@ namespace GeradorApostasLotofacil
         public FormListarApostas(
             IConferenciaService conferenciaService,
             IApostaService apostaService,
-            UsuarioSession usuarioSession)
+            ICaixaLoteriaClient caixa,
+            UsuarioSession usuarioSession,
+            LoteriaConfig config)
         {
             InitializeComponent();
             _conferenciaService = conferenciaService;
             _apostaService = apostaService;
+            _caixa = caixa;
             _usuarioSession = usuarioSession;
+            _config = config;
             btn_exportarApostas.Visible = false;
             btn_exportarPdf.Visible = false;
 
@@ -95,28 +101,21 @@ namespace GeradorApostasLotofacil
                     if (sfd.ShowDialog() == DialogResult.OK)
                     {
                         var sb = new StringBuilder();
+                        int qtd = _config.NumerosPorJogo;
 
-                        // Cabeçalho
-                        sb.AppendLine("Id,PrimeiroNumero,SegundoNumero,TerceiroNumero,QuartoNumero,QuintoNumero,SextoNumero,SetimoNumero,OitavoNumero,NonoNumero,DecimoNumero,DecimoPrimeiroNumero,DecimoSegundoNumero,DecimoTerceiroNumero,DecimoQuartoNumero,DecimoQuintoNumero,Usuario,Data");
+                        // Cabeçalho dinâmico: Id, N1..Nq, Usuario, Data
+                        var colunasNumeros = Enumerable.Range(1, qtd).Select(i => $"Numero{i}");
+                        sb.AppendLine("Id," + string.Join(",", colunasNumeros) + ",Usuario,Data");
 
                         foreach (var item in apostasBuscadas)
                         {
+                            var numeros = item.Numeros
+                                .OrderBy(n => n)
+                                .Take(qtd)
+                                .Select(n => n.ToString());
+
                             sb.AppendLine($"{item.Id}," +
-                                          $"{item.PrimeiroNumero}," +
-                                          $"{item.SegundoNumero}," +
-                                          $"{item.TerceiroNumero}," +
-                                          $"{item.QuartoNumero}," +
-                                          $"{item.QuintoNumero}," +
-                                          $"{item.SextoNumero}," +
-                                          $"{item.SetimoNumero}," +
-                                          $"{item.OitavoNumero}," +
-                                          $"{item.NonoNumero}," +
-                                          $"{item.DecimoNumero}," +
-                                          $"{item.DecimoPrimeiroNumero}," +
-                                          $"{item.DecimoSegundoNumero}," +
-                                          $"{item.DecimoTerceiroNumero}," +
-                                          $"{item.DecimoQuartoNumero}," +
-                                          $"{item.DecimoQuintoNumero}," +
+                                          string.Join(",", numeros) + "," +
                                           $"{item.Usuario}," +
                                           $"{item.DataInclusao}");
                         }
@@ -171,15 +170,13 @@ namespace GeradorApostasLotofacil
                 _loadingPanel.Exibir("Resorteando aposta...");
 
                 // Busca data do próximo sorteio
-                var retornoRobo = await Task.Run(async () =>
-                    await new LoteriasCaixaRobot.Interface.BuscaSorteioInterface()
-                        .BuscaUltimoSorteio(LoteriasCaixaRobot.Request.BaseRequest.TipoSorteio.Lotofacil));
+                var ultimoSorteio = await Task.Run(async () => await _caixa.ObterUltimoAsync());
 
                 // Cria novo registro com os mesmos números
                 var novaAposta = new ApostaModel
                 {
                     DataInclusao = DateTime.Now,
-                    DataApuracao = retornoRobo.DataProximoSorteio,
+                    DataApuracao = ultimoSorteio.DataProximoSorteio,
                     UsuarioId = _usuarioSession.UsuarioLogado!.Id,
                     Jogos = new List<JogoModel>
                     {
@@ -191,7 +188,7 @@ namespace GeradorApostasLotofacil
 
                 _loadingPanel.Ocultar();
                 MessageBox.Show(
-                    $"Aposta resorteada com sucesso!\nPróximo sorteio: {retornoRobo.DataProximoSorteio:dd/MM/yyyy}",
+                    $"Aposta resorteada com sucesso!\nPróximo sorteio: {ultimoSorteio.DataProximoSorteio:dd/MM/yyyy}",
                     "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
@@ -227,16 +224,14 @@ namespace GeradorApostasLotofacil
 
                 _loadingPanel.Exibir("Duplicando aposta...");
 
-                // Busca data do próximo sorteio via robô
-                var retornoRobo = await Task.Run(async () =>
-                    await new LoteriasCaixaRobot.Interface.BuscaSorteioInterface()
-                        .BuscaUltimoSorteio(LoteriasCaixaRobot.Request.BaseRequest.TipoSorteio.Lotofacil));
+                // Busca data do próximo sorteio
+                var ultimoSorteio = await Task.Run(async () => await _caixa.ObterUltimoAsync());
 
                 // Cria nova aposta com TODOS os jogos da aposta original
                 var novaAposta = new ApostaModel
                 {
                     DataInclusao = DateTime.Now,
-                    DataApuracao = retornoRobo.DataProximoSorteio,
+                    DataApuracao = ultimoSorteio.DataProximoSorteio,
                     UsuarioId = _usuarioSession.UsuarioLogado!.Id,
                     Jogos = apostaOriginal.Jogos.Select(j => new JogoModel
                     {
@@ -248,7 +243,7 @@ namespace GeradorApostasLotofacil
 
                 _loadingPanel.Ocultar();
                 MessageBox.Show(
-                    $"Aposta duplicada com sucesso!\n{totalJogos} jogo{(totalJogos > 1 ? "s" : "")} copiado{(totalJogos > 1 ? "s" : "")} para o próximo sorteio: {retornoRobo.DataProximoSorteio:dd/MM/yyyy}",
+                    $"Aposta duplicada com sucesso!\n{totalJogos} jogo{(totalJogos > 1 ? "s" : "")} copiado{(totalJogos > 1 ? "s" : "")} para o próximo sorteio: {ultimoSorteio.DataProximoSorteio:dd/MM/yyyy}",
                     "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
@@ -321,7 +316,7 @@ namespace GeradorApostasLotofacil
                         // Header
                         page.Header().Column(col =>
                         {
-                            col.Item().Text("Gerador de Apostas Lotofácil")
+                            col.Item().Text($"Gerador de Apostas {_config.Nome}")
                                 .FontSize(18).Bold().FontColor(Colors.Blue.Darken2);
                             col.Item().Text($"Apostas de: {usuario}  |  Exportado em: {DateTime.Now:dd/MM/yyyy HH:mm}")
                                 .FontSize(10).FontColor(Colors.Grey.Darken1);
@@ -331,11 +326,12 @@ namespace GeradorApostasLotofacil
                         // Conteúdo - tabela de apostas
                         page.Content().Table(table =>
                         {
-                            // Definir colunas: Data + 15 números + Acertos
+                            // Definir colunas: Data + N números + Acertos
+                            int qtdNumeros = _config.NumerosPorJogo;
                             table.ColumnsDefinition(columns =>
                             {
                                 columns.RelativeColumn(2); // Data
-                                for (int i = 0; i < 15; i++)
+                                for (int i = 0; i < qtdNumeros; i++)
                                     columns.RelativeColumn(1); // Números
                                 columns.RelativeColumn(1.5f); // Acertos
                             });
@@ -344,7 +340,7 @@ namespace GeradorApostasLotofacil
                             table.Header(header =>
                             {
                                 header.Cell().Element(CellHeaderStyle).Text("Data");
-                                for (int i = 1; i <= 15; i++)
+                                for (int i = 1; i <= qtdNumeros; i++)
                                     header.Cell().Element(CellHeaderStyle).Text($"{i}º");
                                 header.Cell().Element(CellHeaderStyle).Text("Acertos");
                             });
@@ -353,21 +349,8 @@ namespace GeradorApostasLotofacil
                             foreach (var item in apostasBuscadas)
                             {
                                 table.Cell().Element(CellStyle).Text(item.DataInclusao);
-                                table.Cell().Element(CellStyle).Text(item.PrimeiroNumero.ToString("D2"));
-                                table.Cell().Element(CellStyle).Text(item.SegundoNumero.ToString("D2"));
-                                table.Cell().Element(CellStyle).Text(item.TerceiroNumero.ToString("D2"));
-                                table.Cell().Element(CellStyle).Text(item.QuartoNumero.ToString("D2"));
-                                table.Cell().Element(CellStyle).Text(item.QuintoNumero.ToString("D2"));
-                                table.Cell().Element(CellStyle).Text(item.SextoNumero.ToString("D2"));
-                                table.Cell().Element(CellStyle).Text(item.SetimoNumero.ToString("D2"));
-                                table.Cell().Element(CellStyle).Text(item.OitavoNumero.ToString("D2"));
-                                table.Cell().Element(CellStyle).Text(item.NonoNumero.ToString("D2"));
-                                table.Cell().Element(CellStyle).Text(item.DecimoNumero.ToString("D2"));
-                                table.Cell().Element(CellStyle).Text(item.DecimoPrimeiroNumero.ToString("D2"));
-                                table.Cell().Element(CellStyle).Text(item.DecimoSegundoNumero.ToString("D2"));
-                                table.Cell().Element(CellStyle).Text(item.DecimoTerceiroNumero.ToString("D2"));
-                                table.Cell().Element(CellStyle).Text(item.DecimoQuartoNumero.ToString("D2"));
-                                table.Cell().Element(CellStyle).Text(item.DecimoQuintoNumero.ToString("D2"));
+                                foreach (var numero in item.Numeros.OrderBy(n => n).Take(qtdNumeros))
+                                    table.Cell().Element(CellStyle).Text(numero.ToString("D2"));
                                 table.Cell().Element(CellStyle).Text(item.Acertos > 0 ? item.Acertos.ToString() : "—");
                             }
                         });

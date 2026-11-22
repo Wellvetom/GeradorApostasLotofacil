@@ -1,4 +1,5 @@
 using GeradorApostasLotofacil.Application;
+using GeradorApostasLotofacil.Domain;
 using GeradorApostasLotofacil.DTO;
 using GeradorApostasLotofacil.Session;
 
@@ -8,12 +9,13 @@ namespace GeradorApostasLotofacil
     {
         private readonly IConferenciaService _conferenciaService;
         private readonly UsuarioSession _usuarioSession;
+        private readonly LoteriaConfig _config;
         private readonly LoadingPanel _loadingPanel;
 
-        private const int TotalNumeros = 25;
-        private const int NumerosPorAposta = 15;
+        private int TotalNumeros => _config.TotalNumeros;
+        private int NumerosPorAposta => _config.NumerosPorJogo;
 
-        // Botões toggle de 1 a 25. O estado "selecionado" é guardado no Tag (bool).
+        // Botões toggle de 1 a TotalNumeros. O estado "selecionado" é guardado no Tag (bool).
         private readonly List<Button> _botoes = new();
 
         // Cores do estado dos botões
@@ -23,11 +25,13 @@ namespace GeradorApostasLotofacil
 
         public FormVerificarAposta(
             IConferenciaService conferenciaService,
-            UsuarioSession usuarioSession)
+            UsuarioSession usuarioSession,
+            LoteriaConfig config)
         {
             InitializeComponent();
             _conferenciaService = conferenciaService;
             _usuarioSession = usuarioSession;
+            _config = config;
 
             CriarBotoesNumeros();
             AtualizarContador();
@@ -36,7 +40,7 @@ namespace GeradorApostasLotofacil
             this.Controls.Add(_loadingPanel);
         }
 
-        /// <summary>Cria os 25 botões selecionáveis (1 a 25).</summary>
+        /// <summary>Cria os botões selecionáveis (1 a TotalNumeros).</summary>
         private void CriarBotoesNumeros()
         {
             for (int i = 1; i <= TotalNumeros; i++)
@@ -56,6 +60,8 @@ namespace GeradorApostasLotofacil
                 };
                 btn.FlatAppearance.BorderSize = 0;
                 btn.Click += NumeroBotao_Click;
+                // Mantém o foco no painel ao passar o mouse, para a roda do mouse rolar a lista.
+                btn.MouseEnter += (_, _) => flowNumeros.Focus();
 
                 _botoes.Add(btn);
                 flowNumeros.Controls.Add(btn);
@@ -70,7 +76,7 @@ namespace GeradorApostasLotofacil
 
             if (!selecionado)
             {
-                // Impede selecionar mais que 15
+                // Impede selecionar mais que o limite da modalidade
                 if (ContarSelecionados() >= NumerosPorAposta)
                 {
                     MessageBox.Show(
@@ -108,9 +114,9 @@ namespace GeradorApostasLotofacil
         {
             int selecionados = ContarSelecionados();
             lblInstrucao.Text =
-                $"Selecione 15 números (1 a 25) e clique em Verificar.  Selecionados: {selecionados}/{NumerosPorAposta}";
+                $"Selecione {NumerosPorAposta} números (1 a {TotalNumeros}) e clique em Verificar.  Selecionados: {selecionados}/{NumerosPorAposta}";
 
-            // Habilita Verificar apenas quando exatamente 15 estão marcados.
+            // Habilita Verificar apenas quando exatamente a quantidade correta está marcada.
             btnVerificar.Enabled = selecionados == NumerosPorAposta;
         }
 
@@ -168,18 +174,18 @@ namespace GeradorApostasLotofacil
                 lblJaApostou.Text = "❌ Não — você ainda não apostou esse jogo.";
             }
 
-            // Card 2: já foi sorteado com 12+?
+            // Card 2: já foi sorteado nas faixas rastreadas pela modalidade?
             if (r.JaFoiSorteado)
             {
                 lblJaSorteado.ForeColor = Color.FromArgb(255, 200, 100);
-                lblJaSorteado.Text =
-                    $"🏆 Sim — 15: {r.Sorteios15.Count} | 14: {r.Sorteios14.Count} | " +
-                    $"13: {r.Sorteios13.Count} | 12: {r.Sorteios12.Count}";
+                var resumoFaixas = string.Join(" | ",
+                    _config.FaixasVerificacao.Select(f => $"{f}: {r.ObterFaixa(f).Count}"));
+                lblJaSorteado.Text = $"🏆 Sim — {resumoFaixas}";
             }
             else
             {
                 lblJaSorteado.ForeColor = Color.FromArgb(210, 210, 230);
-                lblJaSorteado.Text = "❌ Não — nunca saiu com 12 ou mais acertos.";
+                lblJaSorteado.Text = $"❌ Não — nunca saiu com {_config.FaixaMinimaVerificacao} ou mais acertos.";
             }
 
             // Card 3: melhor resultado (acertos × números não sorteados)
@@ -198,11 +204,9 @@ namespace GeradorApostasLotofacil
                     $"🎯 {r.MelhorAcerto} acertos · {r.NaoSorteados} não sorteados{complemento}";
             }
 
-            // Grid: todos os sorteios com 12+ acertos, ordenados por faixa (15→12) e data.
-            var linhas = r.Sorteios15
-                .Concat(r.Sorteios14)
-                .Concat(r.Sorteios13)
-                .Concat(r.Sorteios12)
+            // Grid: todos os sorteios nas faixas rastreadas, ordenados por faixa (desc) e data.
+            var linhas = _config.FaixasVerificacao
+                .SelectMany(f => r.ObterFaixa(f))
                 .Select(s => new
                 {
                     Faixa = $"{s.Acertos}",

@@ -20,7 +20,7 @@ namespace GeradorApostasLotofacil.Repository
             await _context.SaveChangesAsync();
         }
 
-        public async Task<bool> ExisteApostaDuplicada(int usuarioId, DateTime? dataApuracao, List<List<int>> jogos)
+        public async Task<bool> ExisteApostaDuplicada(int usuarioId, DateTime? dataApuracao, List<List<int>> jogos, Modalidade modalidade)
         {
             // Assinatura do lote atual: conjunto (sem ordem) dos hashes de cada jogo.
             var assinaturaNova = jogos
@@ -28,9 +28,9 @@ namespace GeradorApostasLotofacil.Repository
                 .OrderBy(h => h)
                 .ToList();
 
-            // Apostas ativas do mesmo usuário para o mesmo sorteio (mesma data de apuração).
+            // Apostas ativas do mesmo usuário para o mesmo sorteio (mesma data de apuração) e modalidade.
             var query = _context.Apostas
-                .Where(a => a.UsuarioId == usuarioId && a.DataExclusao == null);
+                .Where(a => a.UsuarioId == usuarioId && a.DataExclusao == null && a.Modalidade == modalidade);
 
             query = dataApuracao.HasValue
                 ? query.Where(a => a.DataApuracao == dataApuracao)
@@ -55,26 +55,32 @@ namespace GeradorApostasLotofacil.Repository
             return false;
         }
 
-        public async Task<ApostaModel?> ObterUltima()
+        public async Task<ApostaModel?> ObterUltima(Modalidade modalidade)
         {
             return await _context.Apostas
-                .Where(x => x.UsuarioId == null && x.DataExclusao == null)
+                .Where(x => x.UsuarioId == null && x.DataExclusao == null && x.Modalidade == modalidade)
                 .OrderByDescending(x => x.Id)
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<List<ApostaModel>> ObterUltimas10()
+        public async Task<List<ApostaModel>> ObterUltimas10(Modalidade modalidade)
         {
             return await _context.Apostas
+                .Where(x => x.Modalidade == modalidade)
                 .Include(x => x.Jogos)
                 .OrderByDescending(x => x.DataInclusao)
                 .Take(10)
                 .ToListAsync();
         }
 
-        public List<(int Numero, int Quantidade)> ObterRankingNumeros()
+        public List<(int Numero, int Quantidade)> ObterRankingNumeros(Modalidade modalidade)
         {
-            var numeros = _context.Jogos.AsEnumerable();
+            // Ranking considera apenas os sorteios oficiais (UsuarioId == null) da modalidade.
+            var numeros = _context.Apostas
+                .Where(a => a.Modalidade == modalidade)
+                .Include(a => a.Jogos)
+                .SelectMany(a => a.Jogos)
+                .AsEnumerable();
 
             var retorno = numeros
                 .SelectMany(j => j.Numeros)
@@ -89,18 +95,18 @@ namespace GeradorApostasLotofacil.Repository
             return retorno;
         }
 
-        public async Task<List<ApostaModel>> ObterTodas()
+        public async Task<List<ApostaModel>> ObterTodas(Modalidade modalidade)
         {
             return await _context.Apostas
-                .Where(x => x.DataExclusao == null)
+                .Where(x => x.DataExclusao == null && x.Modalidade == modalidade)
                 .ToListAsync();
         }
 
-        public async Task<List<ApostaModel>> ObterTodasPorId(int usuarioId)
+        public async Task<List<ApostaModel>> ObterTodasPorId(int usuarioId, Modalidade modalidade)
         {
             return await _context.Apostas
                 .Include(x => x.Jogos)
-                .Where(x => x.UsuarioId == usuarioId && x.DataExclusao == null)
+                .Where(x => x.UsuarioId == usuarioId && x.DataExclusao == null && x.Modalidade == modalidade)
                 .ToListAsync();
         }
 
